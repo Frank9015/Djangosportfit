@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Producto - SportFit</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .navbar-brand:hover {
+            color: #ffc107;
+        }
+
+        .product-image {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .product-image:hover {
+            transform: scale(1.05);
+        }
+
+        .product-description {
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            background-color: #fff;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .product-description:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .footer-nav-link {
+            color: #fff;
+            transition: color 0.3s ease;
+        }
+
+        .footer-nav-link:hover {
+            color: #ffc107;
+        }
+
+        .copy {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .copy:hover {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">SportFit</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="productos.html">Productos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="quienes_somos.html">Quiénes Somos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#sabor">Sabor Latino</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="login.html">Iniciar sesión</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-md-6">
+                    <img src="https://via.placeholder.com/600x400" alt="Producto" class="img-fluid product-image" id="mainProductImage">
+                </div>
+                <div class="col-md-6">
+                    <div class="product-description">
+                        <h2>Nombre del Producto</h2>
+                        <p>Descripción detallada del producto. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum.</p>
+                        <p><strong>Precio:</strong> $19.99</p>
+                        <button class="btn btn-primary">Añadir al Carrito</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link footer-nav-link" href="#productos">Productos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link footer-nav-link" href="#nosotros">Quiénes Somos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link footer-nav-link" href="#sabor">Sabor Latino</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link footer-nav-link" href="#login">Iniciar sesión</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="copy text-center mt-3">&copy; 2024 SportFit. Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="zoomModal" tabindex="-1" aria-labelledby="zoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="zoomModalLabel">Zoom de la Imagen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="" class="img-fluid" id="zoomedImage" alt="Zoom Imagen">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script>
+        document.querySelector('.product-image').addEventListener('click', function() {
+            const modalImage = document.getElementById('zoomedImage');
+            modalImage.src = this.src;
+            const modal = new bootstrap.Modal(document.getElementById('zoomModal'));
+            modal.show();
+        });
+    </script>
+</body>
+</html>

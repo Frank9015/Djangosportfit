@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - SportFit</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .navbar-brand:hover {
+            color: #ffc107;
+        }
+
+        .container {
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+
+        .form-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .footer-nav-link {
+            color: #fff;
+            transition: color 0.3s ease;
+        }
+
+        .footer-nav-link:hover {
+            color: #ffc107;
+        }
+
+        .copy {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .copy:hover {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">SportFit</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="productos.html">Productos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="quienes_somos.html">Quiénes Somos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#sabor">Sabor Latino</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="login.html">Iniciar sesión</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <h2 class="mb-4 text-center">Checkout</h2>
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="form-section">
+                        <h4>Información de Envío</h4>
+                        <form id="shippingForm">
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" id="fullName" placeholder="Nombre Completo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Dirección</label>
+                                <input type="text" class="form-control" id="address" placeholder="Dirección" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="city" class="form-label">Ciudad</label>
+                                <input type="text" class="form-control" id="city" placeholder="Ciudad" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="state" class="form-label">Estado</label>
+                                <input type="text" class="form-control" id="state" placeholder="Estado" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="zipCode" class="form-label">Código Postal</label>
+                                <input type="text" class="form-control" id="zipCode" placeholder="Código Postal" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="phone" placeholder="Teléfono" required>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="form-section">
+                        <h4>Método de Pago</h4>
+                        <form id="paymentForm">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="creditCardOption" value="creditCard" required>
+                                    <label class="form-check-label" for="creditCardOption">
+                                        Llenar datos de tarjeta
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="paypalOption" value="paypal" required>
+                                    <label class="form-check-label" for="paypalOption">
+                                        PayPal
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="transbankOption" value="transbank" required>
+                                    <label class="form-check-label" for="transbankOption">
+                                        Transbank
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="creditCardForm" style="display: none;">
+                                <h5>Información de Pago</h5>
+                                <div class="mb-3">
+                                    <label for="cardName" class="form-label">Nombre en la Tarjeta</label>
+                                    <input type="text" class="form-control" id="cardName" placeholder="Nombre en la Tarjeta">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cardNumber" class="form-label">Número de Tarjeta</label>
+                                    <input type="text" class="form-control" id="cardNumber" placeholder="Número de Tarjeta">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="expirationDate" class="form-label">Fecha de Expiración</label>
+                                        <input type="text" class="form-control" id="expirationDate" placeholder="MM/AA">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cvv" class="form-label">CVV</label>
+                                        <input type="text" class="form-control" id="cvv" placeholder="CVV">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="form-section">
+                        <h4>Tu Pedido</h4>
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div>
+                                    <h6 class="my-0">Producto 1</h6>
+                                    <small class="text-muted">Breve descripción</small>
+                                </div>
+                                <span class="text-muted">$15.000</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div>
+                                    <h6 class="my-0">Producto 2</h6>
+                                    <small class="text-muted">Breve descripción</small>
+                                </div>
+                                <span class="text-muted">$10.000</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm">
+                                <div>
+                                    <h6 class="my-0">Producto 3</h6>
+                                    <small class="text-muted">Breve descripción</small>
+                                </div>
+                                <span class="text-muted">$20.000</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Total (CLP)</span>
+                                <strong>$45.000</strong>
+                            </li>
+                        </ul>
+                        <button class="btn btn-primary btn-lg btn-block" type="submit">Confirmar Compra</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link footer-nav-link" href="#productos">Productos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link footer-nav-link" href="#nosotros">Quiénes Somos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link footer-nav-link" href="#sabor">Sabor Latino</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link footer-nav-link" href="#login">Iniciar sesión</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="copy text-center mt-3">&copy; 2024 SportFit. Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('input[name="paymentMethod"]').change(function() {
+                if ($('#creditCardOption').is(':checked')) {
+                    $('#creditCardForm').show();
+                } else {
+                    $('#creditCardForm').hide();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
