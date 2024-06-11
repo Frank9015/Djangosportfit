@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -114,13 +115,16 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'index' %}">Productos</a>
+                            <a class="nav-link" href="{% url 'galeria' %}">Productos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="quienes_somos.html">Quiénes Somos</a>
+                            <a class="nav-link" href="{% url 'quienes' %}">Quiénes Somos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#sabor">Sabor Latino</a>
+                            <a class="nav-link" href="{% url 'saborlatino' %}">Sabor Latino</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'contacto' %}">Contacto</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
@@ -130,71 +134,68 @@
             </div>
         </nav>
     </header>
-
+    <style>
+        /* Define un tamaño máximo para las imágenes de los productos */
+        .product-item img {
+            max-width: 100%; /* Ajusta el ancho máximo de la imagen */
+            height: auto; /* Ajusta automáticamente la altura para mantener la proporción */
+        }
+    </style> 
     <main>
         <section id="destacados" class="py-5">
             <div class="container">
                 <h2 class="mb-4 text-center">Productos Destacados</h2>
                 <div class="row">
+                    <!-- Columna para productos destacados -->
                     <div class="col-md-6">
                         <div class="slick-carousel">
+                            {% for producto_destacado in productos_destacados %}
                             <div>
-                                <img src="https://via.placeholder.com/600x400" alt="Producto 1" class="img-fluid rounded">
+                                <!-- Utiliza la URL de la imagen del producto si existe -->
+                                {% if producto_destacado.imagen %}
+                                <img src="{{ producto_destacado.imagen.url }}" alt="{{ producto_destacado.nombre }}" class="img-fluid rounded">
+                                {% else %}
+                                <p>No hay imagen disponible</p>
+                                {% endif %}
                                 <div class="carousel-caption">
                                     <div class="carousel-caption-inner">
-                                        <h3>Producto 1</h3>
-                                        <p>Descripción del producto. <a href="#" class="text-white text-decoration-underline">Más información</a></p>
+                                        <h3>{{ producto_destacado.nombre }}</h3>
+                                        <p>{{ producto_destacado.descripcion }} <a href="{% url 'infoproducto' producto_destacado.id %}" class="btn btn-primary">Más información</a></p>
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <img src="https://via.placeholder.com/600x400" alt="Producto 2" class="img-fluid rounded">
-                                <div class="carousel-caption">
-                                    <div class="carousel-caption-inner">
-                                        <h3>Producto 2</h3>
-                                        <p>Descripción del producto. <a href="#" class="text-white text-decoration-underline">Más información</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <img src="https://via.placeholder.com/600x400" alt="Producto 3" class="img-fluid rounded">
-                                <div class="carousel-caption">
-                                    <div class="carousel-caption-inner">
-                                        <h3>Producto 3</h3>
-                                        <p>Descripción del producto. <a href="#" class="text-white text-decoration-underline">Más información</a></p>
-                                    </div>
-                                </div>
-                            </div>
+                            {% endfor %}
                         </div>
                     </div>
+                    <!-- Columna para otros productos -->
                     <div class="col-md-6">
                         <div class="row">
+                            {% for producto in otros_productos %}
+                            {% if forloop.counter <= 6 %}
                             <div class="col-6">
                                 <div class="product-item">
-                                    <img src="https://via.placeholder.com/200x200" alt="Producto 4" class="img-fluid mb-3 rounded">
+                                    <!-- Utiliza la URL de la imagen del producto si existe -->
+                                    {% if producto.imagen %}
+                                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid mb-3 rounded">
+                                    {% else %}
+                                    <p>No hay imagen disponible</p>
+                                    {% endif %}
                                     <div class="product-description">
-                                        <p class="mb-3">Descripción del producto. Lorem ipsum dolor sit amet, consectetur adipiscing elit. <a href="info_producto.html" class="text-decoration-underline">Más información</a></p>
-                                        <button class="btn btn-primary">Añadir al Carrito</button>
+                                        <h3>{{ producto.nombre }}</h3> <!-- Agrega el nombre del producto -->
+                                        <p class="mb-3">{{ producto.descripcion }} <a href="{% url 'infoproducto' producto.id %}" class="text-decoration-underline">Más información</a></p>
+                                        <p>Precio: ${{ producto.precio }}</p> <!-- Agrega el precio -->
+                                        <a class="btn btn-primary" href="{% url 'checkout' %}">Añadir al carro</a>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="product-item">
-                                    <img src="https://via.placeholder.com/200x200" alt="Producto 5" class="img-fluid mb-3 rounded">
-                                    <div class="product-description">
-                                        <p class="mb-3">Descripción del producto. Lorem ipsum dolor sit amet, consectetur adipiscing elit. <a href="info_producto.html" class="text-decoration-underline">Más información</a></p>
-                                        <button class="btn btn-primary">Añadir al Carrito</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Repite el mismo patrón para los demás productos -->
+                            {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
         </section>
-    </main>
-
+    </main>    
     <footer class="bg-dark text-white py-4">
         <div class="container">
             <nav class="navbar navbar-expand-lg">
@@ -209,7 +210,7 @@
                         <a class="nav-link footer-nav-link" href="#sabor">Sabor Latino</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link footer-nav-link" href="{% url 'login' %}">Iniciar sesión</a>
+                        <a class="nav-link footer-nav-link" href="">Iniciar sesión</a>
                     </li>
                 </ul>
             </nav>

@@ -17,10 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from  aplicacionsportfit import views as aplicacionsportfit  # Importa la vista index de productos
-from aplicacionsportfit.views import index, login_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', aplicacionsportfit.index, name='index'),  # URL raíz apunta a la vista index
-    path('login/', login_view, name='login'),
+    path('', include('aplicacionsportfit.urls')),  # URL raíz apunta a la vista index
 ]

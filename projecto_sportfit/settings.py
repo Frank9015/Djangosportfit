@@ -38,7 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'aplicacionsportfit',
+    'rest_framework',
+    'crispy_forms',
+    # 'payments',  # Nuestra nueva app de pagos
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -81,7 +85,20 @@ DATABASES = {
     }
 }
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.oracle',
+#        'NAME': 'XE',
+#        'USER': 'SportFit',
+#        'PASSWORD': '1234',
+#        'HOST': 'localhost',
+#        'PORT': '1521',
+#    }
+#}
 
+
+# Password validation
+# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -115,10 +132,20 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = 'static/'
-
+import os
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+# Configuración de archivos multimedia
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuraciones de PayPal
+PAYPAL_CLIENT_ID = 'AWSRye0FTMA-2o2xziTG4Y24KGwdMNiKwYLSKIve8IPhi-H5i8jpQlJ5VJzie-CU6ol3clb5bv0IYHE6'
+PAYPAL_CLIENT_SECRET = 'EF6FWZO8wL0vwjVfeFk7lU_sD8wqEpxyCLuGLDs98Kqht2yTfmYQ-mZ7GfWGU-oBH6FsymA0MsWOQGXh'
+PAYPAL_MODE = 'sandbox'  # Cambia a 'live' para producción

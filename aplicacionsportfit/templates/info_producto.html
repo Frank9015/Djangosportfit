@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -80,34 +81,44 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="productos.html">Productos</a>
+                            <a class="nav-link" href="{% url 'index' %}">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="quienes_somos.html">Quiénes Somos</a>
+                            <a class="nav-link" href="{% url 'galeria' %}">Productos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#sabor">Sabor Latino</a>
+                            <a class="nav-link" href="{% url 'quienes' %}">Quiénes Somos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="login.html">Iniciar sesión</a>
+                            <a class="nav-link" href="{% url 'saborlatino' %}">Sabor Latino</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'contacto' %}">Contacto</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-
+    
     <main>
         <div class="container py-5">
             <div class="row">
                 <div class="col-md-6">
-                    <img src="https://via.placeholder.com/600x400" alt="Producto" class="img-fluid product-image" id="mainProductImage">
+                    {% if producto.imagen %}
+                    <img src="{{ producto.get_imagen_url }}" alt="{{ producto.nombre }}">
+                    {% else %}
+                    <p>No hay imagen disponible</p>
+                    {% endif %}
                 </div>
                 <div class="col-md-6">
                     <div class="product-description">
-                        <h2>Nombre del Producto</h2>
-                        <p>Descripción detallada del producto. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum.</p>
-                        <p><strong>Precio:</strong> $19.99</p>
+                        <h2>{{ producto.nombre }}</h2>
+                        <p>{{ producto.descripcion }}</p>
+                        <p><strong>Precio:</strong> ${{ producto.precio }}</p>
                         <button class="btn btn-primary">Añadir al Carrito</button>
                     </div>
                 </div>
