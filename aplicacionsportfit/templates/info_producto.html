@@ -21,6 +21,8 @@
         .product-image {
             cursor: pointer;
             transition: transform 0.3s ease;
+            max-width: 100%;  /* Limita el ancho de la imagen al 100% del contenedor */
+            height: auto;  /* Mantiene la proporción de la imagen */
         }
 
         .product-image:hover {
@@ -109,7 +111,7 @@
             <div class="row">
                 <div class="col-md-6">
                     {% if producto.imagen %}
-                    <img src="{{ producto.get_imagen_url }}" alt="{{ producto.nombre }}">
+                    <img src="{{ producto.get_imagen_url }}" class="product-image img-fluid" alt="{{ producto.nombre }}">
                     {% else %}
                     <p>No hay imagen disponible</p>
                     {% endif %}

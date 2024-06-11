@@ -63,7 +63,10 @@
                         <h4 class="card-title">{{ producto.nombre }}</h4>
                         <p class="card-text">{{ producto.descripcion }}</p>
                         <p class="product-price">${{ producto.precio }}</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal" data-img-src="{{ producto.get_imagen_url }}">Añadir al Carrito</button>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'infoproducto' producto.id %}" class="btn btn-secondary">Ver más información</a>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal" data-img-src="{{ producto.get_imagen_url }}">Añadir al Carrito</button>
+                        </div>
                     </div>
                 </div>
             </div>
