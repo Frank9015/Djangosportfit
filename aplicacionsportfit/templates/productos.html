@@ -1,49 +1,6 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
-    <style>
-        /* Agrega tu estilo personalizado aquí */
-    </style>
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#">SportFit</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'index' %}">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'galeria' %}">Productos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'quienes' %}">Quiénes Somos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'saborlatino' %}">Sabor Latino</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'contacto' %}">Contacto</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-
+{% block contenido %}
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -57,7 +14,7 @@
                     {% if producto.get_imagen_url %}
                     <img src="{{ producto.get_imagen_url }}" class="img-fluid product-image card-img-top" alt="{{ producto.nombre }}">
                     {% else %}
-                    <img src="{% static 'aplicacionsportfit/static/img/no-disponible.jpg' %}" class="img-fluid product-image card-img-top" alt="Producto No Disponible">
+                    <img src="{% static '/aplicacionsportfit/img/no-disponible.jpg' %}" class="img-fluid product-image card-img-top" alt="Producto No Disponible">
                     {% endif %}
                     <div class="product-description card-body">
                         <h4 class="card-title">{{ producto.nombre }}</h4>
@@ -118,3 +75,4 @@
 </body>
 
 </html>
+{% endblock %}
