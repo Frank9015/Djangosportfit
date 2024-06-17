@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from .models import Producto
+from .models import Producto, Usuario
 import random
 # from .models import Product 
 #from .cart import carro_productos
@@ -192,3 +192,27 @@ def contacto_view(request):
 #     else:
 #         # Si hay un error, mostrar un mensaje de error al usuario
 #         return render(request, "payment_error.html", {"error": payment.error})
+
+
+# NUTRICIONISTA
+
+
+from django.shortcuts import render, redirect
+from .forms import UsuarioForm
+def success_page(request):
+    return render(request, 'success.html')  # Asumiendo que tienes una plantilla 'success.html'
+def registro(request):
+    # Lógica para la vista de registro
+    return render(request, 'registro.html')
+
+def registrar_usuario(request):
+    if request.method == 'POST':
+        form = UsuarioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('success_page')  # Redirigir a una página de éxito
+    else:
+        form = UsuarioForm()
+    return render(request, 'registro.html', {'form': form})
+
+

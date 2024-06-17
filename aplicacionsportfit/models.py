@@ -4,10 +4,6 @@ from django.db import models
 from django.db import models
 from django.contrib.auth.models import User
 
-from django.db import models
-
-from django.db import models
-
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
@@ -46,4 +42,19 @@ class Producto(models.Model):
 #         return f"Payment for {self.cart} by {self.user.username}"
 
 
+class Usuario(models.Model):
+    rut = models.CharField(max_length=12, unique=True)  # Campo de texto para RUT, aseguramos que sea único
+    nombres = models.CharField(max_length=100)  # Campo de texto para nombres
+    edad = models.PositiveIntegerField()  # Campo numérico para la edad
+    direccion = models.CharField(max_length=200)  # Campo de texto para la dirección
+    correo = models.EmailField(unique=True)  # Campo de email, aseguramos que sea único
+    telefono = models.CharField(max_length=15)  # Campo de texto para teléfono
+    fecha_contrato = models.DateField()  # Campo de fecha para la fecha de contrato
+    fecha_termino = models.DateField()  # Campo de fecha para la fecha de término de contrato
+
+    def __str__(self):
+        return f'{self.nombres} ({self.rut})'
+
+    class Meta:
+        ordering = ['nombres']  # Ordenar por nombres
 
