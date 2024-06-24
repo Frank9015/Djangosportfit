@@ -5,110 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SportFit - Tu tienda de deportes</title>
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css">
+    <!-- Estilos personalizados aquí -->
     <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Roboto', sans-serif;
-        }
-
-        .navbar-brand:hover {
-            color: #ffc107;
-        }
-
-        .carousel-caption {
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border-radius: 5px;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            transform: translateY(100%);
-            opacity: 0;
-            transition: transform 0.5s ease, opacity 0.5s ease;
-        }
-
-        .slick-slide:hover .carousel-caption {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .carousel-caption-inner {
-            color: #fff;
-        }
-
-        .carousel-caption-inner h3 {
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .carousel-caption-inner p {
-            font-size: 14px;
-            margin-bottom: 0;
-        }
-
-        .product-item {
-            margin-bottom: 30px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .product-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-description {
-            padding: 15px;
-            border: 1px solid #dee2e6;
-            background-color: #fff;
-            border-radius: 5px;
-            transition: box-shadow 0.3s ease;
-        }
-
-        .product-item:hover .product-description {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-
-        .footer-nav-link {
-            color: #fff;
-            transition: color 0.3s ease;
-        }
-
-        .footer-nav-link:hover {
-            color: #ffc107;
-        }
-
-        .copy {
-            color: #fff;
-            font-size: 14px;
-        }
-
-        .copy:hover {
-            color: #ffc107;
-        }
+        /* Tus estilos personalizados */
     </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="#">SportFit</a>
+                <a class="navbar-brand" href="{% url 'index' %}">SportFit</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -126,24 +36,45 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'contacto' %}">Contacto</a>
                         </li>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Bienvenido {{ user.username }} - 
+                                {% if user.is_superuser %}Superusuario{% else %}
+                                    {% if user.perfil.rol == 'preparador_fisico' %}Preparador Físico{% endif %}
+                                    {% if user.perfil.rol == 'nutricionista' %}Nutricionista{% endif %}
+                                    {% if user.perfil.rol == 'cliente' %}Cliente{% endif %}  
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'carrito' %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cart4" viewBox="0 0 16 16">
+                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H13.5a.5.5 0 0 1 .491.592l-1.5 8a.5.5 0 0 1-.491.408H4.409a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 1.77A.5.5 0 0 1 2 1.5H.5z"/>
+                                    <path d="M4.5 3a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V3z"/>
+                                </svg>
+                            </a>
+                        </li>
+                        {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
                         </li>
+                        {% endif %}
+                       
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
     {% block contenido %}
-
     {% endblock %}
     <footer class="bg-dark text-white py-4">
         <div class="container">
-            
-            <div class="copy text-center mt-3">&copy; 2024 SportFit. Todos los derechos reservados.</div>
+            <div class="copy text-center mt-3">© 2024 SportFit. Todos los derechos reservados.</div>
         </div>
     </footer>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>

@@ -1,179 +1,76 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalles del Producto - SportFit</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Roboto', sans-serif;
-        }
+{% extends 'base.html' %} 
+{% load static %} 
 
-        .navbar-brand:hover {
-            color: #ffc107;
-        }
-
-        .product-image {
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            max-width: 100%;  /* Limita el ancho de la imagen al 100% del contenedor */
-            height: auto;  /* Mantiene la proporción de la imagen */
-        }
-
-        .product-image:hover {
-            transform: scale(1.05);
-        }
-
-        .product-description {
-            padding: 15px;
-            border: 1px solid #dee2e6;
-            background-color: #fff;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            transition: box-shadow 0.3s ease;
-        }
-
-        .product-description:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-
-        .footer-nav-link {
-            color: #fff;
-            transition: color 0.3s ease;
-        }
-
-        .footer-nav-link:hover {
-            color: #ffc107;
-        }
-
-        .copy {
-            color: #fff;
-            font-size: 14px;
-        }
-
-        .copy:hover {
-            color: #ffc107;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#">SportFit</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'index' %}">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'galeria' %}">Productos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'quienes' %}">Quiénes Somos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'saborlatino' %}">Sabor Latino</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'contacto' %}">Contacto</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
-                        </li>
-                    </ul>
-                </div>
+{% block contenido %}
+<main>
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-6">
+                {% if producto.imagen %}
+                <img src="{{ producto.get_imagen_url }}" class="product-image img-fluid" alt="{{ producto.nombre }}">
+                {% else %}
+                <p>No hay imagen disponible</p>
+                {% endif %}
             </div>
-        </nav>
-    </header>
-    
-    <main>
-        <div class="container py-5">
-            <div class="row">
-                <div class="col-md-6">
-                    {% if producto.imagen %}
-                    <img src="{{ producto.get_imagen_url }}" class="product-image img-fluid" alt="{{ producto.nombre }}">
-                    {% else %}
-                    <p>No hay imagen disponible</p>
-                    {% endif %}
-                </div>
-                <div class="col-md-6">
-                    <div class="product-description">
-                        <h2>{{ producto.nombre }}</h2>
-                        <p>{{ producto.descripcion }}</p>
-                        <p><strong>Precio:</strong> ${{ producto.precio }}</p>
-                        <button class="btn btn-primary">Añadir al Carrito</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-dark text-white py-4">
-        <div class="container">
-            <nav class="navbar navbar-expand-lg">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link footer-nav-link" href="#productos">Productos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link footer-nav-link" href="#nosotros">Quiénes Somos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link footer-nav-link" href="#sabor">Sabor Latino</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link footer-nav-link" href="#login">Iniciar sesión</a>
-                    </li>
-                </ul>
-            </nav>
-            <div class="copy text-center mt-3">&copy; 2024 SportFit. Todos los derechos reservados.</div>
-        </div>
-    </footer>
-
-    <div class="modal fade" id="zoomModal" tabindex="-1" aria-labelledby="zoomModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="zoomModalLabel">Zoom de la Imagen</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <img src="" class="img-fluid" id="zoomedImage" alt="Zoom Imagen">
+            <div class="col-md-6">
+                <div class="product-description">
+                    <h2>{{ producto.nombre }}</h2>
+                    <p>{{ producto.descripcion }}</p>
+                    <p><strong>Precio:</strong> ${{ producto.precio }}</p>
+                    <button id="addToCartButton" class="btn btn-primary" data-product-id="{{ producto.id }}">Añadir al Carrito</button>
                 </div>
             </div>
         </div>
     </div>
+</main>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-    <script>
-        document.querySelector('.product-image').addEventListener('click', function() {
-            const modalImage = document.getElementById('zoomedImage');
-            modalImage.src = this.src;
-            const modal = new bootstrap.Modal(document.getElementById('zoomModal'));
-            modal.show();
-        });
-    </script>
-</body>
-</html>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('addToCartButton').addEventListener('click', function() {
+        const productId = this.dataset.productId;
+        
+        {% if user.is_authenticated %}
+            // Solicitud AJAX para usuarios autenticados
+            fetch("{% url 'agregar_al_carrito' 0 %}".replace('0', productId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' // Importante para protección CSRF
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Error al agregar al carrito');
+                }
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire("¡Añadido!", "Producto añadido al carrito.", "success");
+                } else {
+                    Swal.fire("Error", data.error || "No se pudo agregar al carrito.", "error");
+                }
+            })
+            .catch(error => {
+                Swal.fire("Error", error.message, "error");
+            });
+        {% else %}
+            Swal.fire({
+                title: "Debes iniciar sesión",
+                text: "Para comprar, debes iniciar sesión en tu cuenta.",
+                icon: "warning",
+                showCancelButton: true, // <-- Agregar esta línea para mostrar el botón Cancelar
+                confirmButtonText: "Iniciar sesión",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirigir a la página de login
+                    window.location.href = "{% url 'login' %}"; 
+                }
+            });
+        {% endif %}
+    });
+</script>
+
+{% endblock %}

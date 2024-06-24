@@ -2,64 +2,81 @@
 
 {% load static %}
 
-
 {% block contenido %}
 
-    <main>
-        <section id="destacados" class="py-5">
-            <div class="container">
-                <h2 class="mb-4 text-center">Productos Destacados</h2>
-                <div class="row">
-                    <!-- Columna para productos destacados -->
-                    <div class="col-md-6">
-                        <div class="slick-carousel">
-                            {% for producto_destacado in productos_destacados %}
-                            <div>
+<style>
+    .product-item {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 30px;
+    }
+
+    .product-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img-top {
+        transition: opacity 0.3s ease;
+    }
+
+    .card-img-top:hover {
+        opacity: 0.8;
+    }
+</style>
+
+<main>
+    <section id="destacados" class="py-5">
+        <div class="container">
+            <h2 class="mb-4 text-center">Productos Destacados</h2>
+            <div class="row">
+                <!-- Columna para productos destacados -->
+                <div class="col-md-6">
+                    <div class="slick-carousel">
+                        {% for producto_destacado in productos_destacados %}
+                        <div class="card">
+                            <!-- Utiliza la URL de la imagen del producto si existe -->
+                            {% if producto_destacado.imagen %}
+                            <img src="{{ producto_destacado.imagen.url }}" alt="{{ producto_destacado.nombre }}" class="card-img-top">
+                            {% else %}
+                            <p>No hay imagen disponible</p>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ producto_destacado.nombre }}</h5>
+                                <p class="card-text">{{ producto_destacado.descripcion }}</p>
+                                <a href="{% url 'infoproducto' producto_destacado.id %}" class="btn btn-primary">Más información</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Columna para otros productos -->
+                <div class="col-md-6">
+                    <div class="row">
+                        {% for producto in otros_productos %}
+                        {% if forloop.counter <= 6 %}
+                        <div class="col-6">
+                            <div class="card product-item">
                                 <!-- Utiliza la URL de la imagen del producto si existe -->
-                                {% if producto_destacado.imagen %}
-                                <img src="{{ producto_destacado.imagen.url }}" alt="{{ producto_destacado.nombre }}" class="img-fluid rounded">
+                                {% if producto.imagen %}
+                                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="card-img-top">
                                 {% else %}
                                 <p>No hay imagen disponible</p>
                                 {% endif %}
-                                <div class="carousel-caption">
-                                    <div class="carousel-caption-inner">
-                                        <h3>{{ producto_destacado.nombre }}</h3>
-                                        <p>{{ producto_destacado.descripcion }} <a href="{% url 'infoproducto' producto_destacado.id %}" class="btn btn-primary">Más información</a></p>
-                                    </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ producto.nombre }}</h5>
+                                    <p class="card-text">{{ producto.descripcion }}</p>
+                                    <p class="card-text">Precio: ${{ producto.precio }}</p>
+                                    <a href="{% url 'checkout' %}" class="btn btn-primary">Añadir al carro</a>
                                 </div>
                             </div>
-                            {% endfor %}
                         </div>
-                    </div>
-                    <!-- Columna para otros productos -->
-                    <div class="col-md-6">
-                        <div class="row">
-                            {% for producto in otros_productos %}
-                            {% if forloop.counter <= 6 %}
-                            <div class="col-6">
-                                <div class="product-item">
-                                    <!-- Utiliza la URL de la imagen del producto si existe -->
-                                    {% if producto.imagen %}
-                                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid mb-3 rounded">
-                                    {% else %}
-                                    <p>No hay imagen disponible</p>
-                                    {% endif %}
-                                    <div class="product-description">
-                                        <h3>{{ producto.nombre }}</h3> <!-- Agrega el nombre del producto -->
-                                        <p class="mb-3">{{ producto.descripcion }} <a href="{% url 'infoproducto' producto.id %}" class="text-decoration-underline">Más información</a></p>
-                                        <p>Precio: ${{ producto.precio }}</p> <!-- Agrega el precio -->
-                                        <a class="btn btn-primary" href="{% url 'checkout' %}">Añadir al carro</a>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                        </div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-        </section>
-    </main>    
+        </div>
+    </section>
+</main>
 
 {% endblock %}
-  
