@@ -3,7 +3,7 @@
 
 {% block contenido %}
 <main>
-    <div class="container">
+    <div class="container py-5">
         <h2 class="mb-4 text-center">Checkout</h2>
         <div class="row">
             <div class="col-md-7">
@@ -44,13 +44,16 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="paymentMethod" id="creditCardOption" value="creditCard" required>
                                 <label class="form-check-label" for="creditCardOption">
-                                    Llenar datos de tarjeta
+                                    Tarjeta de Crédito/Débito
                                 </label>
-                            </-check">
+                            </div>
+                            <div class="form-check">
                                 <input class="form-check-input" type="radio" name="paymentMethod" id="paypalOption" value="paypal" required>
                                 <label class="form-check-label" for="paypalOption">
                                     PayPal
-                                </-check">
+                                </label>
+                            </div>
+                            <div class="form-check">
                                 <input class="form-check-input" type="radio" name="paymentMethod" id="transbankOption" value="transbank" required>
                                 <label class="form-check-label" for="transbankOption">
                                     Transbank
@@ -84,21 +87,27 @@
                 </div>
             </div>
 
-            <div-section>
+            <div class="col-md-5">
+                <div class="order-summary">
                     <h4>Tu Pedido</h4>
                     <ul class="list-group mb-3">
                         {% for item in carrito.items.all %}
-                        <li class="list-group-item d-flex justify-content-between lh-sm">
-                            <div>
-                                <h6 class="my-0">{{ item.producto.nombre }}</h6>
-                                <small class="text-muted">Cantidad: {{ item.cantidad }}</small>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                {% if item.producto.get_imagen_url %}
+                                <img src="{{ item.producto.get_imagen_url }}" class="img-fluid rounded me-3" style="width: 50px;" alt="{{ item.producto.nombre }}">
+                                {% endif %}
+                                <div>
+                                    <h6 class="my-0">{{ item.producto.nombre }}</h6>
+                                    <small class="text-muted">Cantidad: {{ item.cantidad }}</small>
+                                </div>
                             </div>
-                            <span class="text-muted">${{ item.producto.precio|floatformat:2 }}</span>
+                            <span class="text-muted">${{ item.producto.precio|floatformat:0 }}</span>
                         </li>
                         {% endfor %}
                         <li class="list-group-item d-flex justify-content-between">
                             <span>Total (CLP)</span>
-                            <strong>${{ total_clp|floatformat:2 }}</strong>
+                            <strong>${{ total_clp|floatformat:0 }}</strong>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <span>Total (USD)</span>
@@ -111,10 +120,12 @@
         </div>
     </div>
 </main>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-<script src="https://www.paypal.com/sdk/js?client-id=AT6CV_JL-rXvHBCjC2wYCvjqGuhEXlrr26pMzKsSOJ2JQxrbvK-qpGPunBsKAJAAOeWTgNodlvVaO7f5&currency=USD"></script><script>
+<script src="https://www.paypal.com/sdk/js?client-id=AT6CV_JL-rXvHBCjC2wYCvjqGuhEXlrr26pMzKsSOJ2JQxrbvK-qpGPunBsKAJAAOeWTgNodlvVaO7f5&currency=USD"></script>
+<script>
     $(document).ready(function() {
         $('input[name="paymentMethod"]').change(function() {
             if ($('#creditCardOption').is(':checked')) {
@@ -134,7 +145,7 @@
                 return actions.order.create({
                     purchase_units: [{
                         amount: {
-                            value: '{{ total_usd }}'  // Usar el total en USD desde el contexto
+                            value: '{{ total_usd }}'
                         }
                     }]
                 });

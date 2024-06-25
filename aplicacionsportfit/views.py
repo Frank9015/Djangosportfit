@@ -46,11 +46,10 @@ def galeria(request):
 def carro(request):
     return render(request, 'carro.html')
 
+import yfinance as yf
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Sum
-import yfinance as yf
-
-from .models import Cart, CartItem
+from .models import Cart
 
 def checkout(request):
     if request.user.is_authenticated:
@@ -64,17 +63,10 @@ def checkout(request):
     # Convertir a dólares usando yfinance
     try:
         ticker = yf.Ticker("CLPUSD=X")
-        data = ticker.info
-        
-        # Verificar si 'regularMarketPrice' existe, si no, buscar alternativas
-        if 'regularMarketPrice' in data:
-            tasa_cambio = data['regularMarketPrice']
-        elif 'ask' in data:
-            tasa_cambio = data['ask']
-        elif 'bid' in data:
-            tasa_cambio = data['bid']
-        else:
-            raise KeyError("No se encontró ninguna tasa de cambio válida")
+        data = ticker.history(period="1d")
+        tasa_cambio = data['Close'][0]
+
+        print(f"Tasa de cambio obtenida: {tasa_cambio}")  # Depuración: imprimir la tasa de cambio
         
         total_usd = round(float(total_clp) / tasa_cambio, 2)  # Convertir total_clp a float antes de dividir
     except Exception as e:
@@ -89,6 +81,7 @@ def checkout(request):
     }
 
     return render(request, 'checkout.html', context)
+
 
 
 
@@ -119,6 +112,10 @@ def saborlatino(request):
     
     return render(request, 'saborlatino.html', {'productos': productos})
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -126,6 +123,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            messages.success(request, 'Inicio de sesión exitoso')
             return redirect('index')  # Redirige a la página principal u otra página después de iniciar sesión
         else:
             messages.error(request, 'Usuario o contraseña incorrectos')
@@ -166,34 +164,6 @@ def register_view(request):
     return render(request, 'registro.html')
 
 
-
-    if request.method == 'POST':
-        email = request.POST['email']
-        username = request.POST['username']
-        password = request.POST['password']
-        confirm_password = request.POST['confirmPassword']
-        nombre = request.POST['nombre']
-        apellido_paterno = request.POST['apellidoPaterno']
-        apellido_materno = request.POST['apellidoMaterno']
-        rut = request.POST['rut']
-        direccion = request.POST['direccion']
-        
-        if password == confirm_password:
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'El nombre de usuario ya está en uso.')
-            elif User.objects.filter(email=email).exists():
-                messages.error(request, 'El correo electrónico ya está en uso.')
-            else:
-                user = User.objects.create_user(username=username, password=password, email=email)
-                user.first_name = nombre
-                user.last_name = f"{apellido_paterno} {apellido_materno}"
-                user.save()
-                login(request, user)
-                return redirect('index')  # Redirige a la página principal u otra página después del registro
-        else:
-            messages.error(request, 'Las contraseñas no coinciden.')
-            
-    return render(request, 'registrousuario.html')
 
 
 # views.py
@@ -292,6 +262,60 @@ def eliminar_del_carrito(request, item_id):
     return JsonResponse({'success': True, 'total': nuevo_total})
 
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.contrib.auth.models import User
+from .models import Usuario2, Perfil  # Asegúrate de importar tus modelos
+
+def registrousuario(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        username = request.POST['username']
+        password = request.POST['password']
+        confirm_password = request.POST['confirmPassword']
+        nombre = request.POST['nombre']
+        apellido_paterno = request.POST['apellidoPaterno']
+        apellido_materno = request.POST['apellidoMaterno']
+        rut = request.POST['rut']
+        direccion = request.POST['direccion']
+        edad = request.POST['edad']
+        telefono = request.POST['telefono']
+        
+        if password == confirm_password:
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'El nombre de usuario ya está en uso.')
+            elif User.objects.filter(email=email).exists():
+                messages.error(request, 'El correo electrónico ya está en uso.')
+            elif Usuario2.objects.filter(rut=rut).exists():
+                messages.error(request, 'El RUT ya está en uso.')
+            else:
+                user = User.objects.create_user(username=username, password=password, email=email)
+                user.first_name = nombre
+                user.last_name = f"{apellido_paterno} {apellido_materno}"
+                user.save()
+
+                perfil = Perfil(user=user, rol='cliente')
+                perfil.save()
+
+                usuario2 = Usuario2(
+                    rut=rut,
+                    nombres=f"{nombre} {apellido_paterno} {apellido_materno}",
+                    edad=edad,
+                    direccion=direccion,
+                    correo=email,
+                    telefono=telefono,
+                    user=user
+                )
+                usuario2.save()
+
+                login(request, user)
+                messages.success(request, 'Registro exitoso. Bienvenido!')
+                return redirect('index')
+        else:
+            messages.error(request, 'Las contraseñas no coinciden.')
+            
+    return render(request, 'registrousuario.html')
 
 # from paypalrestsdk import Payment
 

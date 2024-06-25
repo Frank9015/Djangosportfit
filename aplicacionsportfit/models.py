@@ -53,6 +53,31 @@ class CartItem(models.Model):
 #         return f"Payment for {self.cart} by {self.user.username}"
 
 
+from django.db import models
+from django.contrib.auth.models import User
+
+class Usuario2(models.Model):
+    rut = models.CharField(max_length=12, unique=True)
+    nombres = models.CharField(max_length=100)
+    edad = models.PositiveIntegerField()
+    direccion = models.CharField(max_length=200)
+    correo = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=15)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.nombres} ({self.rut})'
+
+    class Meta:
+        ordering = ['nombres']
+
+
+
+
+
+
+
+
 class Usuario(models.Model):
     rut = models.CharField(max_length=12, unique=True)  # Campo de texto para RUT, aseguramos que sea único
     nombres = models.CharField(max_length=100)  # Campo de texto para nombres
