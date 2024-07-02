@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Producto, Contacto, Venta, FichaPaciente, Evolucion, Reserva
+from .models import Producto, Contacto, Venta, FichaPaciente, Evolucion, Reserva, Perfil
 
 class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,3 +31,18 @@ class ReservaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reserva
         fields = '__all__'
+
+class PerfilSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    is_superuser = serializers.BooleanField(source='user.is_superuser', read_only=True)
+
+    class Meta:
+        model = Perfil
+        fields = ['username', 'email', 'rol', 'is_superuser']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.user.is_superuser:
+            representation['rol'] = 'superadmin'
+        return representation

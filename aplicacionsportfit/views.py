@@ -10,14 +10,16 @@ from django.db.models import Sum
 from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser
+from rest_framework import generics
 import requests
 import logging
 import random
 import decimal
 
-from .models import Producto, Usuario, Usuario2, Perfil, Cart, CartItem, Contacto, Venta, FichaPaciente, Evolucion, Reserva
-from .serializers import ProductoSerializer, ContactoSerializer, VentaSerializer, FichaPacienteSerializer, EvolucionSerializer, ReservaSerializer
-from .forms import ContactoForm, FichaPacienteForm, EvolucionForm, ReservaHoraFormCliente, ReservaHoraFormPersonal, UsuarioForm
+from .models import *
+from .serializers import *
+from .forms import *
 
 logger = logging.getLogger(__name__)
 
@@ -399,3 +401,7 @@ class EvolucionViewSet(viewsets.ModelViewSet):
 class ReservaViewSet(viewsets.ModelViewSet):
     queryset = Reserva.objects.all()
     serializer_class = ReservaSerializer
+
+class PerfilViewSet(viewsets.ModelViewSet):
+    queryset = Perfil.objects.all()
+    serializer_class = PerfilSerializer

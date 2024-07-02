@@ -11,6 +11,7 @@ router.register(r'ventas', VentaViewSet)
 router.register(r'fichas', FichaPacienteViewSet)
 router.register(r'evoluciones', EvolucionViewSet)
 router.register(r'reservas', ReservaViewSet)
+router.register(r'perfiles', PerfilViewSet)
 
 # Define las URLs
 urlpatterns = [
