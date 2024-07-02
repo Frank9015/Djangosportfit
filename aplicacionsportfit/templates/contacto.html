@@ -1,39 +1,33 @@
 {% extends 'base.html' %}
 
-{% load static %}
+{% block contenido %}
+<div class="container">
+    <div class="form-container">
+        <h2>Contacto</h2>
+        <form action="{% url 'contacto' %}" method="post" id="contact-form">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                {{ form.nombre }}
+            </div>
 
-    {% block contenido %}
-    <div class="container">
-        <div class="form-container">
-            <h2>Contacto</h2>
-            <form action="#" method="post" id="contact-form">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Nombre:</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                {{ form.email }}
+            </div>
 
-                <div class="mb-3">
-                    <label for="rut" class="form-label">RUT:</label>
-                    <input type="text" class="form-control" id="rut" name="rut" required pattern="\d{7,8}-[\dkK]">
-                </div>
+            <div class="mb-3">
+                <label for="mensaje" class="form-label">Mensaje:</label>
+                {{ form.mensaje }}
+            </div>
 
-                <div class="mb-3">
-                    <label for="solicitud" class="form-label">Tipo de Solicitud:</label>
-                    <select class="form-select" id="solicitud" name="solicitud" required>
-                        <option value="preparador">Preparador Físico</option>
-                        <option value="tienda">Tienda</option>
-                        <option value="nutricionista">Nutricionista</option>
-                    </select>
-                </div>
+            <div class="mb-3">
+                <label for="destinatario" class="form-label">A quién está dirigido:</label>
+                {{ form.destinatario }}
+            </div>
 
-                <div class="mb-3">
-                    <label for="mensaje" class="form-label">Texto de Solicitud:</label>
-                    <textarea class="form-control" id="mensaje" name="mensaje" rows="4" required></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Enviar</button>
-            </form>
-        </div>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
     </div>
-    {% endblock %}
-    
+</div>
+{% endblock %}

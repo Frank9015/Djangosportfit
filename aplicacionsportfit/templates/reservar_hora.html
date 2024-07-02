@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<main>
+    <div class="container py-5">
+        <h2 class="mb-4 text-center">Reservar Hora</h2>
+        <form method="POST" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="{{ form.fecha.id_for_label }}" class="form-label">Fecha:</label>
+                {{ form.fecha }}
+                <div class="invalid-feedback">
+                    {% if form.fecha.errors %}
+                        {{ form.fecha.errors|join:", " }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="{{ form.hora.id_for_label }}" class="form-label">Hora:</label>
+                {{ form.hora }}
+                <div class="invalid-feedback">
+                    {% if form.hora.errors %}
+                        {{ form.hora.errors|join:", " }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="{{ form.motivo.id_for_label }}" class="form-label">Motivo:</label>
+                {{ form.motivo }}
+                <div class="invalid-feedback">
+                    {% if form.motivo.errors %}
+                        {{ form.motivo.errors|join:", " }}
+                    {% endif %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Reservar</button>
+        </form>
+    </div>
+</main>
+{% endblock %}
+
+{% block extracss %}
+    <!-- Carga de estilos adicionales -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+{% endblock %}

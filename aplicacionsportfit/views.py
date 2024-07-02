@@ -1,34 +1,30 @@
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, HttpResponse
-import requests
-import logging
-# from .models import  Cart, ShoppingCart
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.views.decorators.http import require_POST
-from .models import Producto, Usuario
-import random
-# from .models import Product 
-#from .cart import carro_productos
-# Create your views here.
-from django.contrib.auth import logout
-from django.shortcuts import redirect
+from django.http import JsonResponse, HttpResponseRedirect
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Sum
+from django.conf import settings
+from django.core.mail import send_mail
+from rest_framework import viewsets
+import requests
+import logging
+import random
+import decimal
 
+from .models import Producto, Usuario, Usuario2, Perfil, Cart, CartItem, Contacto, Venta, FichaPaciente, Evolucion, Reserva
+from .serializers import ProductoSerializer, ContactoSerializer, VentaSerializer, FichaPacienteSerializer, EvolucionSerializer, ReservaSerializer
+from .forms import ContactoForm, FichaPacienteForm, EvolucionForm, ReservaHoraFormCliente, ReservaHoraFormPersonal, UsuarioForm
+
+logger = logging.getLogger(__name__)
+
+# Index view
 def index(request):
-    # Obtener todos los productos
     todos_productos = Producto.objects.all()
-
-    # Seleccionar aleatoriamente algunos productos para mostrar como destacados
     productos_destacados = random.sample(list(todos_productos), min(len(todos_productos), 3))
-
-    # Obtener otros productos que no están en la lista de productos destacados
     otros_productos = [producto for producto in todos_productos if producto not in productos_destacados]
 
     return render(request, 'index.html', {
@@ -36,21 +32,16 @@ def index(request):
         'otros_productos': otros_productos,
     })
 
-def contacto(request):
-    return render(request, 'contacto.html')
-
+# Galeria view
 def galeria(request):
     productos = Producto.objects.all()
     return render(request, 'productos.html', {'productos': productos})
 
+# Carro view
 def carro(request):
     return render(request, 'carro.html')
 
-import yfinance as yf
-from django.shortcuts import render, get_object_or_404
-from django.db.models import Sum
-from .models import Cart
-
+# Checkout view
 def checkout(request):
     if request.user.is_authenticated:
         carrito, _ = Cart.objects.get_or_create(user=request.user)
@@ -59,42 +50,28 @@ def checkout(request):
         carrito = get_object_or_404(Cart, id=carrito_id)
 
     total_clp = carrito.items.aggregate(total=Sum('producto__precio'))['total'] or 0
+    tipo_cambio_clp_usd = 0.0012
+    total_usd = total_clp * tipo_cambio_clp_usd
 
-    # Convertir a dólares usando yfinance
-    try:
-        ticker = yf.Ticker("CLPUSD=X")
-        data = ticker.history(period="1d")
-        tasa_cambio = data['Close'][0]
-
-        print(f"Tasa de cambio obtenida: {tasa_cambio}")  # Depuración: imprimir la tasa de cambio
-        
-        total_usd = round(float(total_clp) / tasa_cambio, 2)  # Convertir total_clp a float antes de dividir
-    except Exception as e:
-        total_usd = 0.0
-        print(f"Error al obtener la tasa de cambio: {e}")
-
-    # Pasar los totales al contexto
     context = {
         'carrito': carrito,
         'total_clp': total_clp,
         'total_usd': total_usd,
+        'paypal_client_id': settings.PAYPAL_CLIENT_ID
     }
 
     return render(request, 'checkout.html', context)
 
-
-
-
-
+# Quienes somos view
 def quienes_somos(request):
-    return render (request, 'quienes_somos.html' )
+    return render(request, 'quienes_somos.html')
 
+# Info producto view
 def info_producto(request, producto_id):
     producto = get_object_or_404(Producto, pk=producto_id)
     return render(request, 'info_producto.html', {'producto': producto})
 
-logger = logging.getLogger(__name__)
-
+# Sabor Latino view
 def saborlatino(request):
     api_url = "https://www.saborlatinochile.cl/duoc/servicio_web_sportfit.php"
     headers = {
@@ -112,10 +89,7 @@ def saborlatino(request):
     
     return render(request, 'saborlatino.html', {'productos': productos})
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
-
+# Login view
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -124,17 +98,18 @@ def login_view(request):
         if user is not None:
             login(request, user)
             messages.success(request, 'Inicio de sesión exitoso')
-            return redirect('index')  # Redirige a la página principal u otra página después de iniciar sesión
+            return redirect('index')
         else:
             messages.error(request, 'Usuario o contraseña incorrectos')
     return render(request, 'login.html')
 
+# Logout view
 def logout_view(request):
     logout(request)
-    return redirect('index')  # Redirige al usuario a la página de inicio después de cerrar sesión  
+    return redirect('index')
 
-
-def register_view(request):
+# Register view
+def registrousuario(request):
     if request.method == 'POST':
         email = request.POST['email']
         username = request.POST['username']
@@ -157,46 +132,72 @@ def register_view(request):
                 user.last_name = f"{apellido_paterno} {apellido_materno}"
                 user.save()
                 login(request, user)
-                return redirect('index')  # Redirige a la página principal u otra página después del registro
+                return redirect('index')
         else:
             messages.error(request, 'Las contraseñas no coinciden.')
             
     return render(request, 'registro.html')
 
-
-
-
-# views.py
-from django.shortcuts import render
-from django.core.mail import send_mail
-
-def contacto_view(request):
+# Contacto view
+def contacto(request):
     if request.method == 'POST':
-        nombre = request.POST.get('nombre', '')
-        email = request.POST.get('email', '')
-        tipo_solicitud = request.POST.get('tipo_solicitud', '')
-        mensaje = request.POST.get('mensaje', '')
-        recibir_avisos = request.POST.get('avisos', False)
+        form = ContactoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'message': 'Contacto enviado exitosamente!'}, status=200)
+        else:
+            return JsonResponse({'message': 'Error al enviar el contacto.'}, status=400)
+    else:
+        form = ContactoForm()
+    return render(request, 'contacto.html', {'form': form})
 
-        # Aquí puedes agregar la lógica para enviar el correo, por ejemplo:
-        send_mail(
-            f'Solicitud de {tipo_solicitud} de {nombre}',
-            f'Correo de contacto: {email}\n\nMensaje: {mensaje}',
-            'tu@email.com',
-            ['destinatario@email.com'],
-            fail_silently=False,
-        )
+# Dashboard nutricionista view
+@login_required
+def dashboard_nutricionista(request):
+    if request.user.perfil.rol == 'nutricionista' or request.user.is_superuser:
+        fichas = FichaPaciente.objects.filter(usuario=request.user)
+        return render(request, 'dashboard_nutricionista.html', {'fichas': fichas})
+    else:
+        return redirect('index')
 
-        # Luego de enviar el correo, podrías redirigir a una página de éxito o mostrar un mensaje
-        return render(request, 'app/contacto_exitoso.html')
+# Dashboard preparador fisico view
+@login_required
+def dashboard_preparador_fisico(request):
+    if request.user.perfil.rol == 'preparador_fisico' or request.user.is_superuser:
+        evoluciones = Evolucion.objects.filter(ficha__usuario=request.user)
+        return render(request, 'dashboard_preparador_fisico.html', {'evoluciones': evoluciones})
+    else:
+        return redirect('index')
 
-    return render(request, 'contacto.html')
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-from .models import Cart, CartItem, Producto
+# Registrar ficha view
+@login_required
+def registrar_ficha(request):
+    if request.method == 'POST':
+        form = FichaPacienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'message': 'Ficha registrada exitosamente!'}, status=200)
+        else:
+            return JsonResponse({'message': 'Error al registrar la ficha.'}, status=400)
+    else:
+        form = FichaPacienteForm()
+    return render(request, 'registrar_ficha.html', {'form': form})
 
+# Registrar evolucion view
+@login_required
+def registrar_evolucion(request):
+    if request.method == 'POST':
+        form = EvolucionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'message': 'Evolución registrada exitosamente!'}, status=200)
+        else:
+            return JsonResponse({'message': 'Error al registrar la evolución.'}, status=400)
+    else:
+        form = EvolucionForm()
+    return render(request, 'registrar_evolucion.html', {'form': form})
+
+# Carrito view
 def carrito(request):
     if request.user.is_authenticated:
         carrito, _ = Cart.objects.get_or_create(user=request.user)
@@ -209,6 +210,7 @@ def carrito(request):
 
     return render(request, 'carro_productos.html', {'carrito': carrito})
 
+# Actualizar cantidad carrito view
 @require_POST
 def actualizar_cantidad_carrito(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id)
@@ -218,12 +220,11 @@ def actualizar_cantidad_carrito(request, item_id):
         cart_item.cantidad = nueva_cantidad
         cart_item.save()
 
-    total = cart_item.cart.items.aggregate(models.Sum('producto__precio'))['producto__precio__sum']
+    total = cart_item.cart.items.aggregate(Sum('producto__precio'))['producto__precio__sum']
     if total is None:
         total = 0
 
     return JsonResponse({'success': True, 'total': float(total)})
-
 @require_POST
 @csrf_exempt
 def agregar_al_carrito(request, producto_id):
@@ -242,125 +243,105 @@ def agregar_al_carrito(request, producto_id):
         cart_item, created = CartItem.objects.get_or_create(cart=cart, producto=producto)
         if not created:
             cart_item.cantidad += 1
-            cart_item.save()
+        cart_item.save()
 
-        return JsonResponse({'success': True})
-
-    except Producto.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'El producto no existe.'})
+        return JsonResponse({'success': True, 'message': 'Producto agregado al carrito!'})
     except Exception as e:
-        return JsonResponse({'success': False, 'error': f'Ocurrió un error: {str(e)}'})
+        return JsonResponse({'success': False, 'message': str(e)})
 
 
-
-@require_POST
-def eliminar_del_carrito(request, item_id):
-    cart_item = get_object_or_404(CartItem, id=item_id)
-    cart_item.delete()
-    # Calcular el nuevo total del carrito después de eliminar el ítem
-    nuevo_total = calcular_total_carrito(request.user)
-    return JsonResponse({'success': True, 'total': nuevo_total})
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
-from django.contrib.auth.models import User
-from .models import Usuario2, Perfil  # Asegúrate de importar tus modelos
-
-def registrousuario(request):
+# Vista para reservas
+@login_required
+def reservar_hora(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        username = request.POST['username']
-        password = request.POST['password']
-        confirm_password = request.POST['confirmPassword']
-        nombre = request.POST['nombre']
-        apellido_paterno = request.POST['apellidoPaterno']
-        apellido_materno = request.POST['apellidoMaterno']
-        rut = request.POST['rut']
-        direccion = request.POST['direccion']
-        edad = request.POST['edad']
-        telefono = request.POST['telefono']
-        
-        if password == confirm_password:
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'El nombre de usuario ya está en uso.')
-            elif User.objects.filter(email=email).exists():
-                messages.error(request, 'El correo electrónico ya está en uso.')
-            elif Usuario2.objects.filter(rut=rut).exists():
-                messages.error(request, 'El RUT ya está en uso.')
-            else:
-                user = User.objects.create_user(username=username, password=password, email=email)
-                user.first_name = nombre
-                user.last_name = f"{apellido_paterno} {apellido_materno}"
-                user.save()
-
-                perfil = Perfil(user=user, rol='cliente')
-                perfil.save()
-
-                usuario2 = Usuario2(
-                    rut=rut,
-                    nombres=f"{nombre} {apellido_paterno} {apellido_materno}",
-                    edad=edad,
-                    direccion=direccion,
-                    correo=email,
-                    telefono=telefono,
-                    user=user
-                )
-                usuario2.save()
-
-                login(request, user)
-                messages.success(request, 'Registro exitoso. Bienvenido!')
-                return redirect('index')
+        if request.user.perfil.rol in ['nutricionista', 'preparador_fisico']:
+            form = ReservaHoraFormPersonal(request.POST)
         else:
-            messages.error(request, 'Las contraseñas no coinciden.')
-            
-    return render(request, 'registrousuario.html')
+            form = ReservaHoraFormCliente(request.POST)
+        
+        if form.is_valid():
+            reserva = form.save(commit=False)
+            reserva.usuario = request.user
+            reserva.save()
+            return JsonResponse({'message': 'Reserva realizada exitosamente!'}, status=200)
+        else:
+            return JsonResponse({'message': 'Error al realizar la reserva.'}, status=400)
+    else:
+        if request.user.perfil.rol in ['nutricionista', 'preparador_fisico']:
+            form = ReservaHoraFormPersonal()
+        else:
+            form = ReservaHoraFormCliente()
+    return render(request, 'reservar_hora.html', {'form': form})
+# Eliminar del carrito view
+@require_POST
+@csrf_exempt
+def eliminar_del_carrito(request, item_id):
+    try:
+        cart_item = get_object_or_404(CartItem, id=item_id)
+        cart_item.delete()
+        return JsonResponse({'success': True, 'message': 'Producto eliminado del carrito!'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
 
-# from paypalrestsdk import Payment
 
-# def pay_with_paypal(request):
-#     # Obtener el carrito de compras y el usuario actual
-#     user = request.user
-#     shopping_cart = ShoppingCart.objects.filter(user=user)
 
-#     # Crear un objeto de pago de PayPal
-#     payment = Payment({
-#         "intent": "sale",
-#         "payer": {
-#             "payment_method": "paypal"
-#         },
-#         "redirect_urls": {
-#             "return_url": "http://localhost:8000/payment/success/",
-#             "cancel_url": "http://localhost:8000/payment/cancel/"
-#         },
-#         "transactions": [{
-#             "item_list": {
-#                 "items": [{
-#                     "name": item.product.name,
-#                     "sku": "item",
-#                     "price": str(item.product.price),
-#                     "currency": "USD",
-#                     "quantity": item.quantity
-#                 } for item in shopping_cart]
-#             },
-#             "amount": {
-#                 "total": str(sum(item.total_price() for item in shopping_cart)),
-#                 "currency": "USD"
-#             },
-#             "description": "Compra en nuestra tienda."
-#         }]
-#     })
 
-#     # Crear el pago en PayPal
-#     if payment.create():
-#         for link in payment.links:
-#             if link.method == "REDIRECT":
-#                 # Redirigir al usuario a PayPal para completar la transacción
-#                 return HttpResponseRedirect(link.href)
-#     else:
-#         # Si hay un error, mostrar un mensaje de error al usuario
-#         return render(request, "payment_error.html", {"error": payment.error})
+import decimal
+from django.conf import settings
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from paypalrestsdk import Payment
+from .models import Cart, CartItem, Producto
+
+def pay_with_paypal(request):
+    # Obtener el carrito de compras y el usuario actual
+    user = request.user
+    cart = Cart.objects.filter(user=user).first()
+
+    if cart:
+        # Obtener todos los ítems en el carrito
+        items_in_cart = CartItem.objects.filter(cart=cart)
+
+        # Crear un objeto de pago de PayPal
+        paypal_payment = {
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": request.build_absolute_uri(reverse('payment_success')),
+                "cancel_url": request.build_absolute_uri(reverse('payment_cancel'))
+            },
+            "transactions": [{
+                "item_list": {
+                    "items": [{
+                        "name": item.producto.nombre,
+                        "sku": "item",
+                        "price": str(item.producto.precio),
+                        "currency": "USD",
+                        "quantity": item.cantidad
+                    } for item in items_in_cart]
+                },
+                "amount": {
+                    "total": str(sum(decimal.Decimal(item.producto.precio) * item.cantidad for item in items_in_cart)),
+                    "currency": "USD"
+                },
+                "description": "Compra en nuestra tienda."
+            }]
+        }
+
+        # Crear el pago en PayPal
+        paypal_payment_object = Payment(paypal_payment)
+        if paypal_payment_object.create():
+            for link in paypal_payment_object.links:
+                if link.method == "REDIRECT":
+                    # Redirigir al usuario a PayPal para completar la transacción
+                    return redirect(link.href)
+        else:
+            # Si hay un error, mostrar un mensaje de error al usuario
+            return render(request, "payment_error.html", {"error": paypal_payment_object.error})
+
+    return render(request, "payment_error.html", {"error": "Algo salió mal."})
 
 
 # NUTRICIONISTA
@@ -370,7 +351,7 @@ from django.shortcuts import render, redirect
 from .forms import UsuarioForm
 def success_page(request):
     return render(request, 'success.html')  # Asumiendo que tienes una plantilla 'success.html'
-def registro(request):
+def register_view(request):
     # Lógica para la vista de registro
     return render(request, 'registro.html')
 
@@ -383,5 +364,56 @@ def registrar_usuario(request):
     else:
         form = UsuarioForm()
     return render(request, 'registro.html', {'form': form})
+    
 
+@login_required
+def reservar_hora(request):
+    if request.method == 'POST':
+        if request.user.groups.filter(name='Personal').exists():
+            form = ReservaHoraFormPersonal(request.POST, user=request.user)
+        else:
+            form = ReservaHoraFormCliente(request.POST)
+        
+        if form.is_valid():
+            reserva = form.save(commit=False)
+            if not request.user.groups.filter(name='Personal').exists():
+                reserva.usuario = request.user
+            reserva.save()
+            messages.success(request, 'La reserva se ha realizado correctamente.')
+            return redirect('reserva_exitosa')  # Redirigir a una página de confirmación o éxito
+        else:
+            messages.error(request, 'Hubo un error en la reserva. Por favor, verifica los datos ingresados.')
+    else:
+        if request.user.groups.filter(name='Personal').exists():
+            form = ReservaHoraFormPersonal(user=request.user)
+        else:
+            form = ReservaHoraFormCliente()
 
+    context = {
+        'form': form,
+    }
+    return render(request, 'reservar_hora.html', context)
+
+class ProductoViewSet(viewsets.ModelViewSet):
+    queryset = Producto.objects.all()
+    serializer_class = ProductoSerializer
+
+class ContactoViewSet(viewsets.ModelViewSet):
+    queryset = Contacto.objects.all()
+    serializer_class = ContactoSerializer
+
+class VentaViewSet(viewsets.ModelViewSet):
+    queryset = Venta.objects.all()
+    serializer_class = VentaSerializer
+
+class FichaPacienteViewSet(viewsets.ModelViewSet):
+    queryset = FichaPaciente.objects.all()
+    serializer_class = FichaPacienteSerializer
+
+class EvolucionViewSet(viewsets.ModelViewSet):
+    queryset = Evolucion.objects.all()
+    serializer_class = EvolucionSerializer
+
+class ReservaViewSet(viewsets.ModelViewSet):
+    queryset = Reserva.objects.all()
+    serializer_class = ReservaSerializer

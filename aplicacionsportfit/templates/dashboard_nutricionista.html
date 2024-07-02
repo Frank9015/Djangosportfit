@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <h2 class="mb-4">Dashboard Nutricionista</h2>
+            <a href="{% url 'registrar_ficha' %}" class="btn btn-primary mb-3">Registrar Ficha</a>
+            <!-- Opciones adicionales -->
+            <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action">Ver Reservas</a>
+                <a href="#" class="list-group-item list-group-item-action">Ver Clientes</a>
+                <!-- Agrega más opciones según sea necesario -->
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="table-responsive">
+                <h3 class="mb-4">Fichas de Pacientes</h3>
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Peso</th>
+                            <th>Altura</th>
+                            <th>Fecha de Creación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ficha in fichas %}
+                        <tr>
+                            <td>{{ ficha.paciente }}</td>
+                            <td>{{ ficha.peso }}</td>
+                            <td>{{ ficha.altura }}</td>
+                            <td>{{ ficha.fecha_creacion }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">No hay fichas registradas.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+    

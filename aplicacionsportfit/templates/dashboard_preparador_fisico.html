@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Dashboard Preparador Físico</h2>
+        <a href="{% url 'registrar_evolucion' %}" class="btn btn-success">Registrar Evolución</a>
+    </div>
+    <table class="table table-striped mt-4">
+        <thead class="table-dark">
+            <tr>
+                <th>Paciente</th>
+                <th>Peso</th>
+                <th>Altura</th>
+                <th>IMC</th>
+                <th>Fecha de Evolución</th>
+                <th>Comentarios</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for evolucion in evoluciones %}
+            <tr>
+                <td>{{ evolucion.ficha.usuario.username }}</td>
+                <td>{{ evolucion.peso }}</td>
+                <td>{{ evolucion.altura }}</td>
+                <td>{{ evolucion.imc }}</td>
+                <td>{{ evolucion.fecha }}</td>
+                <td>{{ evolucion.comentarios }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    const deleteButtons = document.querySelectorAll('.btn-delete');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            const url = this.getAttribute('href');
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción no se puede deshacer",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, borrar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            })
+        });
+    });
+</script>
+{% endblock %}

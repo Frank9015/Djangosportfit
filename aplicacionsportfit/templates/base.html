@@ -37,32 +37,39 @@
                             <a class="nav-link" href="{% url 'contacto' %}">Contacto</a>
                         </li>
                         {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Bienvenido {{ user.username }} - 
-                                {% if user.is_superuser %}Superusuario{% else %}
-                                    {% if user.perfil.rol == 'preparador_fisico' %}Preparador Físico{% endif %}
-                                    {% if user.perfil.rol == 'nutricionista' %}Nutricionista{% endif %}
-                                    {% if user.perfil.rol == 'cliente' %}Cliente{% endif %}  
-                                {% endif %}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'carrito' %}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cart4" viewBox="0 0 16 16">
-                                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H13.5a.5.5 0 0 1 .491.592l-1.5 8a.5.5 0 0 1-.491.408H4.409a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 1.77A.5.5 0 0 1 2 1.5H.5z"/>
-                                    <path d="M4.5 3a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H5a.5.5 0 0 1-.5-.5V3z"/>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                    <path d="M8 0a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm0 4a2 2 0 1 1-1.576.776A5.5 5.5 0 0 1 8 14a5.5 5.5 0 0 1 1.576-4.224A2 2 0 1 1 8 4zm0 6a3 3 0 1 0 3 3 3 3 0 0 0-3-3z"/>
                                 </svg>
+                                Bienvenido {{ user.username }}
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                {% if user.is_superuser %}
+                                <li><a class="dropdown-item" href="{% url 'dashboard_nutricionista' %}">Ver Fichas</a></li>
+                                <li><a class="dropdown-item" href="#">Opciones para Preparador Físico</a></li>
+                                <li><a class="dropdown-item" href="{% url 'carrito' %}">Ver Carrito</a></li>
+                                <li><a class="dropdown-item" href="#">Seguimiento de Pedidos</a></li>
+                                <li><a class="dropdown-item" href="#">Reservas Pendientes/Historial</a></li>
+                                {% elif user.perfil.rol == 'nutricionista' %}
+                                <li><a class="dropdown-item" href="{% url 'dashboard_nutricionista' %}">Ver Fichas</a></li>
+                                {% elif user.perfil.rol == 'preparador_fisico' %}
+                                <li><a class="dropdown-item" href="#">Opciones para Preparador Físico</a></li>
+                                {% elif user.perfil.rol == 'cliente' %}
+                                <li><a class="dropdown-item" href="{% url 'reservar_hora' %}">Reservar Hora</a></li>
+                                <li><a class="dropdown-item" href="{% url 'carrito' %}">Ver Carrito</a></li>
+                                <li><a class="dropdown-item" href="#">Seguimiento de Pedidos</a></li>
+                                <li><a class="dropdown-item" href="#">Reservas Pendientes/Historial</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">Cerrar sesión</a></li>
+                            </ul>
                         </li>
                         {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
                         </li>
                         {% endif %}
-                       
                     </ul>
                 </div>
             </div>
@@ -79,6 +86,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    <!-- Bootstrap CSS local -->
+<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+<!-- Bootstrap Datepicker CSS local -->
+<link href="{% static 'css/bootstrap-datepicker3.min.css' %}" rel="stylesheet">
     <script>
         $(document).ready(function(){
             $('.slick-carousel').slick({

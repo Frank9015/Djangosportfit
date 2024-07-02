@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'aplicacionsportfit',
     'rest_framework',
     'crispy_forms',
-    # 'payments',  # Nuestra nueva app de pagos
+    'payments',  # Nuestra nueva app de pagos
 ]
 
 

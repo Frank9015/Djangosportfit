@@ -1,8 +1,7 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.contrib.auth.models import User
+
+# Modelo para los productos en la tienda
 
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
@@ -17,8 +16,72 @@ class Producto(models.Model):
         if self.imagen:
             return self.imagen.url
         else:
-            return '/static/img/no-disponible.jpg'  # Ruta a la imagen predeterminada dentro de la aplicación
+            return '/static/img/no-disponible.jpg'
 
+# Modelo para los mensajes de contacto recibidos
+class Contacto(models.Model):
+    nombre = models.CharField(max_length=200)
+    email = models.EmailField()
+    mensaje = models.TextField()
+    fecha_contacto = models.DateTimeField(auto_now_add=True)
+    destinatario = models.CharField(max_length=50, choices=[('nutricionista', 'Nutricionista'), ('preparador_fisico', 'Preparador Físico')])
+
+    def __str__(self):
+        return f"{self.nombre} - {self.email}"
+
+
+# Modelo para las ventas realizadas
+class Venta(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField()
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha_venta = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Venta {self.id} - {self.usuario.username}"
+
+# Modelo para los recibos asociados a las ventas
+class Recibo(models.Model):
+    venta = models.OneToOneField(Venta, on_delete=models.CASCADE)
+    recibo_pdf = models.FileField(upload_to='recibos/')
+    fecha_emision = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Recibo {self.id} - Venta {self.venta.id}"
+
+# Modelo para la ficha de un paciente
+class FichaPaciente(models.Model):
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    peso = models.FloatField()
+    altura = models.FloatField()
+    imc = models.FloatField(blank=True, null=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Ficha {self.id} - {self.usuario.username}"
+
+    def save(self, *args, **kwargs):
+        self.imc = self.peso / (self.altura ** 2)
+        super(FichaPaciente, self).save(*args, **kwargs)
+
+# Modelo para la evolución de un paciente
+class Evolucion(models.Model):
+    ficha = models.ForeignKey(FichaPaciente, on_delete=models.CASCADE)
+    fecha = models.DateField()
+    peso = models.FloatField()
+    altura = models.FloatField()
+    imc = models.FloatField(blank=True, null=True)
+    comentarios = models.TextField()
+
+    def __str__(self):
+        return f"Evolución {self.id} - Ficha {self.ficha.id}"
+
+    def save(self, *args, **kwargs):
+        self.imc = self.peso / (self.altura ** 2)
+        super(Evolucion, self).save(*args, **kwargs)
+
+# Modelo para el perfil de usuario con roles
 class Perfil(models.Model):
     ROLES = [
         ('cliente', 'Cliente'),
@@ -33,29 +96,16 @@ class Perfil(models.Model):
     def __str__(self):
         return f"Perfil de {self.user.username}"
 
+# Modelos para el carrito de compras
 class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)  # Relaciona el carrito con un usuario (opcional)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
 
-
-
-# class Payment(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     cart = models.ForeignKey(ShoppingCart, on_delete=models.CASCADE)
-#     payment_method = models.CharField(max_length=50)  # Puede ser PayPal u otro método de pago
-#     is_paid = models.BooleanField(default=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return f"Payment for {self.cart} by {self.user.username}"
-
-
-from django.db import models
-from django.contrib.auth.models import User
-
+# Modelo adicional de usuario con datos personales
 class Usuario2(models.Model):
     rut = models.CharField(max_length=12, unique=True)
     nombres = models.CharField(max_length=100)
@@ -71,26 +121,28 @@ class Usuario2(models.Model):
     class Meta:
         ordering = ['nombres']
 
-
-
-
-
-
-
-
+# Modelo original de usuario con contrato específico
 class Usuario(models.Model):
-    rut = models.CharField(max_length=12, unique=True)  # Campo de texto para RUT, aseguramos que sea único
-    nombres = models.CharField(max_length=100)  # Campo de texto para nombres
-    edad = models.PositiveIntegerField()  # Campo numérico para la edad
-    direccion = models.CharField(max_length=200)  # Campo de texto para la dirección
-    correo = models.EmailField(unique=True)  # Campo de email, aseguramos que sea único
-    telefono = models.CharField(max_length=15)  # Campo de texto para teléfono
-    fecha_contrato = models.DateField()  # Campo de fecha para la fecha de contrato
-    fecha_termino = models.DateField()  # Campo de fecha para la fecha de término de contrato
+    rut = models.CharField(max_length=12, unique=True)
+    nombres = models.CharField(max_length=100)
+    edad = models.PositiveIntegerField()
+    direccion = models.CharField(max_length=200)
+    correo = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=15)
+    fecha_contrato = models.DateField()
+    fecha_termino = models.DateField()
 
     def __str__(self):
         return f'{self.nombres} ({self.rut})'
 
     class Meta:
-        ordering = ['nombres']  # Ordenar por nombres
+        ordering = ['nombres']
 
+class Reserva(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha = models.DateField()
+    hora = models.TimeField()
+    motivo = models.TextField()
+
+    def __str__(self):
+        return f"Reserva de {self.usuario.username} para {self.fecha} a las {self.hora}"
