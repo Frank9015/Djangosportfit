@@ -1,3 +1,4 @@
+annotated-types==0.7.0
 asgiref==3.7.2
 beautifulsoup4==4.12.3
 certifi==2023.7.22
@@ -6,6 +7,7 @@ charset-normalizer==3.3.0
 click==8.1.7
 colorama==0.4.6
 cors==1.0.1
+cryptography==42.0.8
 CurrencyConverter==0.17.23
 Django==4.2.5
 django-admin-interface==0.28.6
@@ -38,6 +40,8 @@ mock==5.1.0
 multitasking==0.0.11
 numpy==2.0.0
 pandas==2.2.2
+payments==0.2
+paypalrestsdk==1.13.3
 peewee==3.17.5
 Pillow==10.0.1
 platformdirs==4.2.2
@@ -45,7 +49,10 @@ pycodestyle==2.11.1
 pycparser==2.21
 pycryptodome==3.20.0
 pycryptodomex==3.20.0
+pydantic==2.8.0
+pydantic_core==2.20.0
 pyflakes==3.2.0
+pyOpenSSL==24.1.0
 pypng==0.20220715.0
 pyserial==3.5
 PySide6==6.6.3.1
