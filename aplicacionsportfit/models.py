@@ -138,10 +138,25 @@ class Usuario(models.Model):
     class Meta:
         ordering = ['nombres']
 
+
 class Reserva(models.Model):
+    MODALIDAD_CHOICES = [
+        ('Virtual', 'Virtual'),
+        ('Presencial', 'Presencial'),
+        ('sin datos', 'Sin datos'),  # Añade una opción de valor predeterminado
+    ]
+
+    ESPECIALIDAD_CHOICES = [
+        ('Preparador físico', 'Preparador físico'),
+        ('Nutricionista', 'Nutricionista'),
+        ('sin datos', 'Sin datos'),  # Añade una opción de valor predeterminado
+    ]
+
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     fecha = models.DateField()
     hora = models.TimeField()
+    modalidad = models.CharField(max_length=20, choices=MODALIDAD_CHOICES, default='sin datos')
+    especialidad = models.CharField(max_length=20, choices=ESPECIALIDAD_CHOICES, default='sin datos')
     motivo = models.TextField()
 
     def __str__(self):

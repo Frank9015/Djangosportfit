@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+<main>
+    <div class="container py-5">
+        <h2 class="mb-4 text-center">Historial de Compras y Reservas</h2>
+
+        <!-- Historial de Compras -->
+        <h3 class="mb-3">Historial de Compras</h3>
+        {% if ventas %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Total</th>
+                        <th>Fecha de Venta</th>
+                        <th>Seguimiento de Envío</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas %}
+                    <tr>
+                        <td>{{ venta.id }}</td>
+                        <td>{{ venta.producto.nombre }}</td>
+                        <td>{{ venta.cantidad }}</td>
+                        <td>{{ venta.total }}</td>
+                        <td>{{ venta.fecha_venta }}</td>
+                        <td>
+                            <!-- Botón de seguimiento (de momento inactivo) -->
+                            <button class="btn btn-outline-primary btn-sm disabled">Seguimiento</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center">No hay compras registradas.</p>
+        {% endif %}
+
+        <!-- Historial de Reservas -->
+        <h3 class="mt-5 mb-3">Historial de Reservas de Hora</h3>
+        {% if reservas %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Modalidad</th>
+                        <th>Especialidad</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in reservas %}
+                    <tr>
+                        <td>{{ reserva.id }}</td>
+                        <td>{{ reserva.fecha }}</td>
+                        <td>{{ reserva.hora }}</td>
+                        <td>{{ reserva.get_modalidad_display }}</td>
+                        <td>{{ reserva.get_especialidad_display }}</td>
+                        <td>{{ reserva.motivo }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center">No hay reservas registradas.</p>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

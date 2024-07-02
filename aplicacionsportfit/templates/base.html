@@ -49,8 +49,7 @@
                                 <li><a class="dropdown-item" href="{% url 'dashboard_nutricionista' %}">Ver Fichas</a></li>
                                 <li><a class="dropdown-item" href="#">Opciones para Preparador Físico</a></li>
                                 <li><a class="dropdown-item" href="{% url 'carrito' %}">Ver Carrito</a></li>
-                                <li><a class="dropdown-item" href="#">Seguimiento de Pedidos</a></li>
-                                <li><a class="dropdown-item" href="#">Reservas Pendientes/Historial</a></li>
+                                <li><a class="dropdown-item" href="{% url 'historial' %}">Historial</a></li>
                                 {% elif user.perfil.rol == 'nutricionista' %}
                                 <li><a class="dropdown-item" href="{% url 'dashboard_nutricionista' %}">Ver Fichas</a></li>
                                 {% elif user.perfil.rol == 'preparador_fisico' %}
@@ -58,8 +57,7 @@
                                 {% elif user.perfil.rol == 'cliente' %}
                                 <li><a class="dropdown-item" href="{% url 'reservar_hora' %}">Reservar Hora</a></li>
                                 <li><a class="dropdown-item" href="{% url 'carrito' %}">Ver Carrito</a></li>
-                                <li><a class="dropdown-item" href="#">Seguimiento de Pedidos</a></li>
-                                <li><a class="dropdown-item" href="#">Reservas Pendientes/Historial</a></li>
+                                <li><a class="dropdown-item" href="{% url 'historial' %}">Historial</a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'logout' %}">Cerrar sesión</a></li>

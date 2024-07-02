@@ -48,29 +48,34 @@ class EvolucionForm(forms.ModelForm):
             'comentarios': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Comentarios', 'rows': 4}),
         }
 
-
-from django import forms
-from .models import Reserva
-from django.utils import timezone
-
 class ReservaHoraFormCliente(forms.ModelForm):
     class Meta:
         model = Reserva
-        fields = ['fecha', 'hora', 'motivo']
+        fields = ['fecha', 'hora', 'modalidad', 'especialidad', 'motivo']
         widgets = {
             'fecha': forms.DateInput(
                 attrs={
-                    'type': 'date',  # Usa el tipo de entrada HTML5 para fechas
-                    'min': timezone.now().strftime('%Y-%m-%d'),  # Fecha mínima es hoy
+                    'type': 'date',
+                    'min': timezone.now().strftime('%Y-%m-%d'),
                     'class': 'form-control',
                     'placeholder': 'Seleccione una fecha'
                 }
             ),
             'hora': forms.TimeInput(
                 attrs={
-                    'type': 'time',  # Usa el tipo de entrada HTML5 para horas
+                    'type': 'time',
                     'class': 'form-control',
                     'placeholder': 'Seleccione una hora'
+                }
+            ),
+            'modalidad': forms.Select(
+                attrs={
+                    'class': 'form-control',
+                }
+            ),
+            'especialidad': forms.Select(
+                attrs={
+                    'class': 'form-control',
                 }
             ),
             'motivo': forms.Textarea(
@@ -84,22 +89,32 @@ class ReservaHoraFormCliente(forms.ModelForm):
 class ReservaHoraFormPersonal(forms.ModelForm):
     class Meta:
         model = Reserva
-        fields = ['usuario', 'fecha', 'hora', 'motivo']
+        fields = ['usuario', 'fecha', 'hora', 'modalidad', 'especialidad', 'motivo']
         widgets = {
             'usuario': forms.HiddenInput(),
             'fecha': forms.DateInput(
                 attrs={
-                    'type': 'date',  # Usa el tipo de entrada HTML5 para fechas
-                    'min': timezone.now().strftime('%Y-%m-%d'),  # Fecha mínima es hoy
+                    'type': 'date',
+                    'min': timezone.now().strftime('%Y-%m-%d'),
                     'class': 'form-control',
                     'placeholder': 'Seleccione una fecha'
                 }
             ),
             'hora': forms.TimeInput(
                 attrs={
-                    'type': 'time',  # Usa el tipo de entrada HTML5 para horas
+                    'type': 'time',
                     'class': 'form-control',
                     'placeholder': 'Seleccione una hora'
+                }
+            ),
+            'modalidad': forms.Select(
+                attrs={
+                    'class': 'form-control',
+                }
+            ),
+            'especialidad': forms.Select(
+                attrs={
+                    'class': 'form-control',
                 }
             ),
             'motivo': forms.Textarea(

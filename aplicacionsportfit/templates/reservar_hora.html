@@ -4,7 +4,7 @@
 <main>
     <div class="container py-5">
         <h2 class="mb-4 text-center">Reservar Hora</h2>
-        <form method="POST" class="needs-validation" novalidate>
+        <form id="reserva-form" method="POST" class="needs-validation" novalidate>
             {% csrf_token %}
             <div class="mb-3">
                 <label for="{{ form.fecha.id_for_label }}" class="form-label">Fecha:</label>
@@ -21,6 +21,24 @@
                 <div class="invalid-feedback">
                     {% if form.hora.errors %}
                         {{ form.hora.errors|join:", " }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="{{ form.modalidad.id_for_label }}" class="form-label">Modalidad:</label>
+                {{ form.modalidad }}
+                <div class="invalid-feedback">
+                    {% if form.modalidad.errors %}
+                        {{ form.modalidad.errors|join:", " }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="{{ form.especialidad.id_for_label }}" class="form-label">Especialidad:</label>
+                {{ form.especialidad }}
+                <div class="invalid-feedback">
+                    {% if form.especialidad.errors %}
+                        {{ form.especialidad.errors|join:", " }}
                     {% endif %}
                 </div>
             </div>
@@ -42,4 +60,94 @@
 {% block extracss %}
     <!-- Carga de estilos adicionales -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+{% endblock %}
+
+{% block extrascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        document.getElementById('reserva-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+
+            let valid = true;
+            let errorMessage = '';
+
+            // Validar los campos
+            if (!form.fecha.value) {
+                valid = false;
+                errorMessage += 'Por favor, selecciona una fecha.\n';
+            }
+            if (!form.hora.value) {
+                valid = false;
+                errorMessage += 'Por favor, selecciona una hora.\n';
+            }
+            if (!form.modalidad.value) {
+                valid = false;
+                errorMessage += 'Por favor, selecciona una modalidad.\n';
+            }
+            if (!form.especialidad.value) {
+                valid = false;
+                errorMessage += 'Por favor, selecciona una especialidad.\n';
+            }
+            if (!form.motivo.value.trim()) {
+                valid = false;
+                errorMessage += 'Por favor, ingresa un motivo.\n';
+            }
+
+            if (!valid) {
+                Swal.fire({
+                    title: 'Error',
+                    text: errorMessage,
+                    icon: 'error'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Confirma que deseas hacer esta reserva",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, reservar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(form.action, {
+                        method: form.method,
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire({
+                                title: '¡Reservado!',
+                                text: data.message,
+                                icon: 'success'
+                            }).then(() => {
+                                window.location.href = "{% url 'index' %}";
+                            });
+                        } else {
+                            let errorMessages = 'Error al realizar la reserva.\n';
+                            const errors = JSON.parse(data.errors);
+                            for (const [field, errorList] of Object.entries(errors)) {
+                                errorMessages += `${field}: ${errorList.map(error => error.message).join(', ')}\n`;
+                            }
+
+                            Swal.fire({
+                                title: 'Error',
+                                text: errorMessages,
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 {% endblock %}

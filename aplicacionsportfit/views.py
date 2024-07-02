@@ -250,28 +250,6 @@ def agregar_al_carrito(request, producto_id):
         return JsonResponse({'success': False, 'message': str(e)})
 
 
-# Vista para reservas
-@login_required
-def reservar_hora(request):
-    if request.method == 'POST':
-        if request.user.perfil.rol in ['nutricionista', 'preparador_fisico']:
-            form = ReservaHoraFormPersonal(request.POST)
-        else:
-            form = ReservaHoraFormCliente(request.POST)
-        
-        if form.is_valid():
-            reserva = form.save(commit=False)
-            reserva.usuario = request.user
-            reserva.save()
-            return JsonResponse({'message': 'Reserva realizada exitosamente!'}, status=200)
-        else:
-            return JsonResponse({'message': 'Error al realizar la reserva.'}, status=400)
-    else:
-        if request.user.perfil.rol in ['nutricionista', 'preparador_fisico']:
-            form = ReservaHoraFormPersonal()
-        else:
-            form = ReservaHoraFormCliente()
-    return render(request, 'reservar_hora.html', {'form': form})
 # Eliminar del carrito view
 @require_POST
 @csrf_exempt
@@ -365,34 +343,38 @@ def registrar_usuario(request):
         form = UsuarioForm()
     return render(request, 'registro.html', {'form': form})
     
-
 @login_required
 def reservar_hora(request):
     if request.method == 'POST':
-        if request.user.groups.filter(name='Personal').exists():
-            form = ReservaHoraFormPersonal(request.POST, user=request.user)
+        if request.user.perfil.rol in ['nutricionista', 'preparador_fisico']:
+            form = ReservaHoraFormPersonal(request.POST)
         else:
             form = ReservaHoraFormCliente(request.POST)
         
         if form.is_valid():
             reserva = form.save(commit=False)
-            if not request.user.groups.filter(name='Personal').exists():
-                reserva.usuario = request.user
+            reserva.usuario = request.user
             reserva.save()
-            messages.success(request, 'La reserva se ha realizado correctamente.')
-            return redirect('reserva_exitosa')  # Redirigir a una página de confirmación o éxito
+            return JsonResponse({'status': 'success', 'message': 'Reserva realizada exitosamente!'}, status=200)
         else:
-            messages.error(request, 'Hubo un error en la reserva. Por favor, verifica los datos ingresados.')
+            errors = form.errors.as_json()
+            return JsonResponse({'status': 'error', 'message': 'Error al realizar la reserva.', 'errors': errors}, status=400)
     else:
-        if request.user.groups.filter(name='Personal').exists():
-            form = ReservaHoraFormPersonal(user=request.user)
+        if request.user.perfil.rol in ['nutricionista', 'preparador_fisico']:
+            form = ReservaHoraFormPersonal()
         else:
             form = ReservaHoraFormCliente()
+    return render(request, 'reservar_hora.html', {'form': form})
 
+@login_required
+def historial(request):
+    ventas = Venta.objects.filter(usuario=request.user)
+    reservas = Reserva.objects.filter(usuario=request.user)
     context = {
-        'form': form,
+        'ventas': ventas,
+        'reservas': reservas
     }
-    return render(request, 'reservar_hora.html', context)
+    return render(request, 'historial.html', context)
 
 class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all()
