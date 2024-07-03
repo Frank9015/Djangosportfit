@@ -281,14 +281,21 @@ def actualizar_cantidad_carrito(request, item_id):
     nueva_cantidad = int(request.POST.get('cantidad', 1))
 
     if nueva_cantidad > 0:
+        # Guardar la cantidad anterior para posibles errores
+        previous_quantity = cart_item.cantidad
+
         cart_item.cantidad = nueva_cantidad
         cart_item.save()
 
-    total = cart_item.cart.items.aggregate(Sum('producto__precio'))['producto__precio__sum']
-    if total is None:
-        total = 0
+        # Recalcular el total del carrito después de actualizar la cantidad
+        total = cart_item.cart.items.aggregate(Sum('producto__precio'))['producto__precio__sum']
+        if total is None:
+            total = 0
 
-    return JsonResponse({'success': True, 'total': float(total)})
+        return JsonResponse({'success': True, 'total': float(total)})
+    else:
+        return JsonResponse({'success': False, 'error': 'La cantidad debe ser mayor que cero.', 'previous_quantity': cart_item.cantidad})
+
 @require_POST
 @csrf_exempt
 def agregar_al_carrito(request, producto_id):
@@ -332,7 +339,6 @@ def obtener_carrito(request):
         })
 
     return JsonResponse({'cart_items': items})
-
 # Eliminar del carrito view
 @require_POST
 @csrf_exempt
@@ -340,6 +346,7 @@ def eliminar_del_carrito(request, item_id):
     try:
         cart_item = get_object_or_404(CartItem, id=item_id)
         cart_item.delete()
+
         return JsonResponse({'success': True, 'message': 'Producto eliminado del carrito!'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)})

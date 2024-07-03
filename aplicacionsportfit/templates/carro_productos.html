@@ -96,7 +96,7 @@
                     document.getElementById('totalPrice').innerText = 'Total: CLP 0'; 
                 }
             } else {
-                Swal.fire("Error", data.error || "No se pudo eliminar del carrito.", "error");
+                Swal.fire("Error", data.message || "No se pudo eliminar del carrito.", "error");
             }
         })
         .catch(error => {
@@ -119,7 +119,7 @@
             if (data.success) {
                 updateTotal(data.total); 
             } else {
-                Swal.fire("Error", data.error || "No se pudo actualizar la cantidad.", "error");
+                Swal.fire("Error", data.message || "No se pudo actualizar la cantidad.", "error");
             }
         }).catch(error => {
             Swal.fire("Error", error.message, "error");
