@@ -5,14 +5,21 @@
     <div class="row">
         <div class="col-md-6">
             <h2 class="mb-4">Dashboard Nutricionista</h2>
-            <a href="{% url 'registrar_ficha' %}" class="btn btn-primary mb-3">Registrar Ficha</a>
+            <a href="{% url 'registrar_ficha' %}" class="btn btn-primary mb-3">
+                <i class="fas fa-file-medical-alt me-2"></i> Registrar Ficha
+            </a>
             <!-- Opciones adicionales -->
             <div class="list-group">
-                <a href="#" class="list-group-item list-group-item-action">Ver Reservas</a>
-                <a href="#" class="list-group-item list-group-item-action">Ver Clientes</a>
+                <a href="{% url 'ver_reservasn' %}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-calendar-alt me-2"></i> Ver Reservas
+                </a>
+                <a href="{% url 'ver_clientes' %}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-users me-2"></i> Ver Clientes
+                </a>
                 <!-- Agrega más opciones según sea necesario -->
             </div>
         </div>
+        
         <div class="col-md-6">
             <div class="table-responsive">
                 <h3 class="mb-4">Fichas de Pacientes</h3>
@@ -28,10 +35,10 @@
                     <tbody>
                         {% for ficha in fichas %}
                         <tr>
-                            <td>{{ ficha.paciente }}</td>
+                            <td>{{ ficha.usuario.username }}</td>
                             <td>{{ ficha.peso }}</td>
                             <td>{{ ficha.altura }}</td>
-                            <td>{{ ficha.fecha_creacion }}</td>
+                            <td>{{ ficha.fecha_registro|date:"d/m/Y H:i:s" }}</td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -45,4 +52,17 @@
     </div>
 </div>
 {% endblock %}
-    
+
+{% block extracss %}
+    <!-- Carga de estilos adicionales -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Agrega más enlaces de CSS según sea necesario -->
+{% endblock %}
+
+{% block extrascripts %}
+    <!-- Carga de scripts adicionales -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <!-- Agrega más scripts según sea necesario -->
+{% endblock %}

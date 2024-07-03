@@ -148,3 +148,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 PAYPAL_CLIENT_ID = 'AWSRye0FTMA-2o2xziTG4Y24KGwdMNiKwYLSKIve8IPhi-H5i8jpQlJ5VJzie-CU6ol3clb5bv0IYHE6'
 PAYPAL_CLIENT_SECRET = 'EF6FWZO8wL0vwjVfeFk7lU_sD8wqEpxyCLuGLDs98Kqht2yTfmYQ-mZ7GfWGU-oBH6FsymA0MsWOQGXh'
 PAYPAL_MODE = 'sandbox'  # Cambia a 'live' para producción
+

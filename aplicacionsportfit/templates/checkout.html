@@ -3,75 +3,146 @@
 
 {% block contenido %}
 <main>
-    <div class="container py-5">
+    <div class="container">
         <h2 class="mb-4 text-center">Checkout</h2>
         <div class="row">
             <div class="col-md-7">
                 <div class="form-section">
                     <h4>Información de Envío</h4>
-                    <form id="shippingForm">
-                        <!-- Formulario de envío -->
-                    </form>
-                </div>
-
-                <div class="form-section">
-                    <h4>Método de Pago</h4>
-                    <form id="paymentForm">
+                    <form id="shippingForm" method="post">
+                        {% csrf_token %}
                         <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="creditCardOption" value="creditCard" required>
-                                <label class="form-check-label" for="creditCardOption">
-                                    Tarjeta de Crédito/Débito
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="paypalOption" value="paypal" required>
-                                <label class="form-check-label" for="paypalOption">
-                                    PayPal
-                                </label>
-                            </div>
-                            <!-- Otros métodos de pago -->
+                            <label for="fullName" class="form-label">Nombre Completo</label>
+                            <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Nombre Completo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="address" name="address" placeholder="Dirección" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="city" class="form-label">Ciudad</label>
+                            <input type="text" class="form-control" id="city" name="city" placeholder="Ciudad" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="state" class="form-label">Estado</label>
+                            <input type="text" class="form-control" id="state" name="state" placeholder="Estado" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="zipCode" class="form-label">Código Postal</label>
+                            <input type="text" class="form-control" id="zipCode" name="zipCode" placeholder="Código Postal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Teléfono" required>
                         </div>
 
-                        <div id="creditCardForm" style="display: none;">
-                            <!-- Formulario de tarjeta de crédito -->
+                        <div class="form-section">
+                            <h4>Método de Pago</h4>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="creditCardOption" value="creditCard" required>
+                                    <label class="form-check-label" for="creditCardOption">
+                                        Llenar datos de tarjeta
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="paypalOption" value="paypal" required>
+                                    <label class="form-check-label" for="paypalOption">
+                                        PayPal
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="transbankOption" value="transbank" required>
+                                    <label class="form-check-label" for="transbankOption">
+                                        Transbank
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="creditCardForm" style="display: none;">
+                                <h5>Información de Pago</h5>
+                                <div class="mb-3">
+                                    <label for="cardName" class="form-label">Nombre en la Tarjeta</label>
+                                    <input type="text" class="form-control" id="cardName" name="cardName" placeholder="Nombre en la Tarjeta">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cardNumber" class="form-label">Número de Tarjeta</label>
+                                    <input type="text" class="form-control" id="cardNumber" name="cardNumber" placeholder="Número de Tarjeta">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="expirationDate" class="form-label">Fecha de Expiración</label>
+                                        <input type="text" class="form-control" id="expirationDate" name="expirationDate" placeholder="MM/AA">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cvv" class="form-label">CVV</label>
+                                        <input type="text" class="form-control" id="cvv" name="cvv" placeholder="CVV">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="paypal-button-container" style="display: none;"></div>
                         </div>
-                        <div id="paypal-button-container" style="display: none;"></div>
+                        <button id="confirmButton" class="btn btn-primary btn-lg btn-block" type="submit">Confirmar Compra</button>
                     </form>
                 </div>
             </div>
 
             <div class="col-md-5">
-                <div class="order-summary">
+                <div class="form-section">
                     <h4>Tu Pedido</h4>
-                    <ul class="list-group mb-3">
-                        {% for item in carrito.items.all %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <!-- Detalles del pedido -->
-                        </li>
-                        {% endfor %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Total (CLP)</span>
-                            <strong>${{ total_clp|floatformat:2 }}</strong>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>Total (USD)</span>
-                            <strong>${{ total_usd|floatformat:2 }}</strong>
-                        </li>
+                    <ul class="list-group mb-3" id="order-summary">
+                        <!-- Productos del carrito se cargarán aquí -->
                     </ul>
-                    <button id="confirmButton" class="btn btn-primary btn-lg btn-block" type="button">Confirmar Compra</button>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Total (CLP)</span>
+                        <strong id="total-clp">$0</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Total (USD)</span>
+                        <strong id="total-usd">$0.00</strong>
+                    </li>
                 </div>
             </div>
         </div>
     </div>
 </main>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-<script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=USD"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=AT6CV_JL-rXvHBCjC2wYCvjqGuhEXlrr26pMzKsSOJ2JQxrbvK-qpGPunBsKAJAAOeWTgNodlvVaO7f5&currency=USD"></script>
 <script>
     $(document).ready(function() {
+        const exchangeRate = 800;  // 1 USD = 800 CLP
+
+        function updateOrderSummary(cartItems) {
+            let orderSummary = '';
+            let totalCLP = 0;
+
+            cartItems.forEach(item => {
+                totalCLP += item.producto.precio * item.cantidad;
+                orderSummary += `
+                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                        <div>
+                            <h6 class="my-0">${item.producto.nombre}</h6>
+                            <small class="text-muted">Cantidad: ${item.cantidad}</small>
+                        </div>
+                        <span class="text-muted">$${(item.producto.precio * item.cantidad).toLocaleString()}</span>
+                    </li>
+                `;
+            });
+
+            $('#order-summary').html(orderSummary);
+            $('#total-clp').text('$' + totalCLP.toLocaleString());
+            calculateTotalInUSD(totalCLP);
+        }
+
+        function calculateTotalInUSD(totalCLP) {
+            const totalUSD = (totalCLP / exchangeRate).toFixed(2);
+            $('#total-usd').text('$' + totalUSD);
+            return totalUSD;
+        }
+
         $('input[name="paymentMethod"]').change(function() {
             if ($('#creditCardOption').is(':checked')) {
                 $('#creditCardForm').show();
@@ -87,22 +158,49 @@
 
         paypal.Buttons({
             createOrder: function(data, actions) {
+                const totalUSD = calculateTotalInUSD(parseInt($('#total-clp').text().replace(/\D/g, '')));
                 return actions.order.create({
                     purchase_units: [{
                         amount: {
-                            currency_code: 'USD',
-                            value: '{{ total_usd }}'  // Asegúrate de que total_usd esté en formato adecuado (por ejemplo, 123.45)
+                            value: totalUSD  // El valor total de los productos en USD
                         }
                     }]
                 });
             },
             onApprove: function(data, actions) {
                 return actions.order.capture().then(function(details) {
-                    alert('Transacción completada por ' + details.payer.name.given_name);
-                    // Aquí puedes redirigir a una página de confirmación o actualizar el estado del pedido
+                    alert('Transaction completed by ' + details.payer.name.given_name);
+                    // Redirigir al historial de compras
+                    window.location.href = "{% url 'historial' %}";
                 });
             }
         }).render('#paypal-button-container');
+
+        $('#confirmButton').click(function(event) {
+            event.preventDefault();
+            if ($('#creditCardOption').is(':checked')) {
+                // Procesar pago con tarjeta de crédito
+                // Lógica para el procesamiento del pago con tarjeta
+                alert('Pago con tarjeta de crédito procesado');
+                // Redirigir al historial de compras
+                window.location.href = "{% url 'historial' %}";
+            } else {
+                alert('Seleccione un método de pago válido');
+            }
+        });
+
+        // Llamada AJAX para obtener los items del carrito
+        $.ajax({
+            url: '{% url "obtener_carrito" %}',  // Asegúrate de que esta URL esté definida en tu urls.py
+            method: 'GET',
+            success: function(response) {
+                updateOrderSummary(response.cart_items);
+            },
+            error: function() {
+                alert('Error al obtener los productos del carrito.');
+            }
+        });
     });
 </script>
 {% endblock %}
+

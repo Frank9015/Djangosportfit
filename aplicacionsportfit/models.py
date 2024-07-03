@@ -44,7 +44,7 @@ class Venta(models.Model):
 # Modelo para los recibos asociados a las ventas
 class Recibo(models.Model):
     venta = models.OneToOneField(Venta, on_delete=models.CASCADE)
-    recibo_pdf = models.FileField(upload_to='recibos/')
+    metodo_pago = models.CharField(max_length=50)
     fecha_emision = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -161,3 +161,32 @@ class Reserva(models.Model):
 
     def __str__(self):
         return f"Reserva de {self.usuario.username} para {self.fecha} a las {self.hora}"
+
+class DatosEnvio(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    nombre_completo = models.CharField(max_length=255)
+    direccion = models.CharField(max_length=255)
+    ciudad = models.CharField(max_length=100)
+    estado = models.CharField(max_length=100)
+    codigo_postal = models.CharField(max_length=20)
+    telefono = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"Datos de Envío {self.id} - {self.usuario.username}"
+
+
+class ContratoEmpleado(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=255)
+    rut = models.CharField(max_length=12)  # Suponiendo formato estándar para RUT chileno
+    salario = models.DecimalField(max_digits=10, decimal_places=2)
+    rol = models.CharField(max_length=100)
+    fecha_inicio = models.DateField()
+    fecha_termino = models.DateField(null=True, blank=True)
+    region = models.CharField(max_length=100, null=True, blank=True)
+    ciudad = models.CharField(max_length=100, null=True, blank=True)
+    codigo_postal = models.CharField(max_length=20, null=True, blank=True)
+    # Otros campos según necesidades
+
+    def __str__(self):
+        return f"Contrato de {self.nombre} ({self.usuario.username})"

@@ -12,6 +12,18 @@ from django.core.mail import send_mail
 from rest_framework import viewsets
 from rest_framework.permissions import IsAdminUser
 from rest_framework import generics
+
+from django.shortcuts import render, redirect, reverse
+from django.http import HttpResponseServerError, JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Cart, CartItem, DatosEnvio, Venta, Recibo
+
+import requests
+import json
+
+from django.conf import settings
+from django.db import transaction
+
 import requests
 import logging
 import random
@@ -44,26 +56,65 @@ def carro(request):
     return render(request, 'carro.html')
 
 # Checkout view
+@login_required
 def checkout(request):
-    if request.user.is_authenticated:
-        carrito, _ = Cart.objects.get_or_create(user=request.user)
-    else:
-        carrito_id = request.session.get('carrito_id')
-        carrito = get_object_or_404(Cart, id=carrito_id)
+    user = request.user
+    cart, created = Cart.objects.get_or_create(user=user)
+    cart_items = CartItem.objects.filter(cart=cart)
 
-    total_clp = carrito.items.aggregate(total=Sum('producto__precio'))['total'] or 0
-    tipo_cambio_clp_usd = 0.0012
-    total_usd = total_clp * tipo_cambio_clp_usd
+    if request.method == 'POST':
+        try:
+            # Obtener datos del formulario de pago
+            full_name = request.POST.get('fullName')
+            address = request.POST.get('address')
+            city = request.POST.get('city')
+            state = request.POST.get('state')
+            zip_code = request.POST.get('zipCode')
+            phone = request.POST.get('phone')
+            payment_method = request.POST.get('paymentMethod')
 
-    context = {
-        'carrito': carrito,
-        'total_clp': total_clp,
-        'total_usd': total_usd,
-        'paypal_client_id': settings.PAYPAL_CLIENT_ID
-    }
+            # Guardar datos de envío
+            datos_envio = DatosEnvio.objects.create(
+                usuario=user,
+                nombre_completo=full_name,
+                direccion=address,
+                ciudad=city,
+                estado=state,
+                codigo_postal=zip_code,
+                telefono=phone
+            )
 
-    return render(request, 'checkout.html', context)
+            # Iniciar una transacción para asegurar la consistencia de la base de datos
+            with transaction.atomic():
+                total_venta = 0
+                for item in cart_items:
+                    total_venta += item.producto.precio * item.cantidad
 
+                    # Crear registro de venta
+                    venta = Venta.objects.create(
+                        usuario=user,
+                        producto=item.producto,
+                        cantidad=item.cantidad,
+                        total=item.producto.precio * item.cantidad
+                    )
+
+                    # Crear registro de recibo asociado a la venta
+                    Recibo.objects.create(
+                        venta=venta,
+                        metodo_pago=payment_method
+                    )
+
+                # Limpiar el carrito
+                cart_items.delete()
+
+            # Redirigir al historial de compras
+            return redirect(reverse('historial_compras'))
+
+        except Exception as e:
+            # Manejar cualquier excepción y mostrar un mensaje de error
+            return HttpResponseServerError(f'Error al procesar la compra: {str(e)}')
+
+    return render(request, 'checkout.html', {'cart_items': cart_items})
 # Quienes somos view
 def quienes_somos(request):
     return render(request, 'quienes_somos.html')
@@ -129,16 +180,24 @@ def registrousuario(request):
             elif User.objects.filter(email=email).exists():
                 messages.error(request, 'El correo electrónico ya está en uso.')
             else:
+                # Crear el usuario
                 user = User.objects.create_user(username=username, password=password, email=email)
                 user.first_name = nombre
                 user.last_name = f"{apellido_paterno} {apellido_materno}"
                 user.save()
+                
+                # Crear el perfil asociado con el rol de cliente
+                perfil = Perfil.objects.create(user=user, rol='cliente')
+                perfil.save()
+                
+                # Iniciar sesión automáticamente
                 login(request, user)
-                return redirect('index')
+                
+                return redirect('index')  # Ajusta 'index' a la URL de tu página de inicio
         else:
             messages.error(request, 'Las contraseñas no coinciden.')
             
-    return render(request, 'registro.html')
+    return render(request, 'registrousuario.html')
 
 # Contacto view
 def contacto(request):
@@ -157,10 +216,10 @@ def contacto(request):
 @login_required
 def dashboard_nutricionista(request):
     if request.user.perfil.rol == 'nutricionista' or request.user.is_superuser:
-        fichas = FichaPaciente.objects.filter(usuario=request.user)
+        fichas = FichaPaciente.objects.all()  # Filtrar todas las fichas
         return render(request, 'dashboard_nutricionista.html', {'fichas': fichas})
     else:
-        return redirect('index')
+        return redirect('index')  # Ajusta 'index' a la URL de tu página de inicio
 
 # Dashboard preparador fisico view
 @login_required
@@ -177,10 +236,13 @@ def registrar_ficha(request):
     if request.method == 'POST':
         form = FichaPacienteForm(request.POST)
         if form.is_valid():
-            form.save()
-            return JsonResponse({'message': 'Ficha registrada exitosamente!'}, status=200)
+            ficha_paciente = form.save(commit=False)
+            # Calcular IMC y guardarlo en la instancia de FichaPaciente
+            ficha_paciente.imc = ficha_paciente.peso / (ficha_paciente.altura ** 2)
+            ficha_paciente.save()
+            return JsonResponse({'message': 'Ficha registrada exitosamente!', 'imc': ficha_paciente.imc}, status=200)
         else:
-            return JsonResponse({'message': 'Error al registrar la ficha.'}, status=400)
+            return JsonResponse({'message': 'Error al registrar la ficha.', 'errors': form.errors}, status=400)
     else:
         form = FichaPacienteForm()
     return render(request, 'registrar_ficha.html', {'form': form})
@@ -251,6 +313,25 @@ def agregar_al_carrito(request, producto_id):
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)})
 
+@login_required
+def obtener_carrito(request):
+    user = request.user
+    cart, created = Cart.objects.get_or_create(user=user)
+    cart_items = CartItem.objects.filter(cart=cart).select_related('producto')
+
+    items = []
+    for item in cart_items:
+        items.append({
+            'producto': {
+                'nombre': item.producto.nombre,
+                'precio': item.producto.precio,
+                'descripcion': item.producto.descripcion,
+                'imagen': item.producto.imagen.url,
+            },
+            'cantidad': item.cantidad,
+        })
+
+    return JsonResponse({'cart_items': items})
 
 # Eliminar del carrito view
 @require_POST
@@ -273,56 +354,31 @@ from django.urls import reverse
 from paypalrestsdk import Payment
 from .models import Cart, CartItem, Producto
 
-def pay_with_paypal(request):
-    # Obtener el carrito de compras y el usuario actual
-    user = request.user
-    cart = Cart.objects.filter(user=user).first()
 
-    if cart:
-        # Obtener todos los ítems en el carrito
-        items_in_cart = CartItem.objects.filter(cart=cart)
+@csrf_exempt
+def confirmar_pago_paypal(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        payment_id = data.get('paymentID')
+        payer_id = data.get('payerID')
+        token = data.get('token')
 
-        # Crear un objeto de pago de PayPal
-        paypal_payment = {
-            "intent": "sale",
-            "payer": {
-                "payment_method": "paypal"
-            },
-            "redirect_urls": {
-                "return_url": request.build_absolute_uri(reverse('payment_success')),
-                "cancel_url": request.build_absolute_uri(reverse('payment_cancel'))
-            },
-            "transactions": [{
-                "item_list": {
-                    "items": [{
-                        "name": item.producto.nombre,
-                        "sku": "item",
-                        "price": str(item.producto.precio),
-                        "currency": "USD",
-                        "quantity": item.cantidad
-                    } for item in items_in_cart]
-                },
-                "amount": {
-                    "total": str(sum(decimal.Decimal(item.producto.precio) * item.cantidad for item in items_in_cart)),
-                    "currency": "USD"
-                },
-                "description": "Compra en nuestra tienda."
-            }]
+        url = f"https://api.sandbox.paypal.com/v1/payments/payment/{payment_id}/execute/"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {settings.PAYPAL_CLIENT_ID}"
+        }
+        payload = {
+            "payer_id": payer_id
         }
 
-        # Crear el pago en PayPal
-        paypal_payment_object = Payment(paypal_payment)
-        if paypal_payment_object.create():
-            for link in paypal_payment_object.links:
-                if link.method == "REDIRECT":
-                    # Redirigir al usuario a PayPal para completar la transacción
-                    return redirect(link.href)
+        response = requests.post(url, headers=headers, json=payload)
+        if response.status_code == 200:
+            return JsonResponse({'success': True, 'message': 'Pago confirmado'})
         else:
-            # Si hay un error, mostrar un mensaje de error al usuario
-            return render(request, "payment_error.html", {"error": paypal_payment_object.error})
-
-    return render(request, "payment_error.html", {"error": "Algo salió mal."})
-
+            return JsonResponse({'success': False, 'message': 'Error al confirmar el pago'})
+    else:
+        return JsonResponse({'success': False, 'message': 'Método no permitido'})
 
 # NUTRICIONISTA
 
@@ -378,6 +434,28 @@ def historial(request):
     }
     return render(request, 'historial.html', context)
 
+
+@login_required
+def ver_reservasn(request):
+    # Verificar que el usuario tenga el rol de nutricionista
+    if request.user.perfil.rol == 'nutricionista':
+        # Filtrar las reservas por la especialidad de nutricionista
+        reservas = Reserva.objects.filter(especialidad='Nutricionista')
+        return render(request, 'reservas_nutricionista.html', {'reservas': reservas})
+    elif request.user.is_superuser:
+        # Si es superusuario, puede ver todas las reservas
+        reservas = Reserva.objects.all()
+        return render(request, 'reservas_nutricionista.html', {'reservas': reservas})
+    else:
+        # Redirigir a la página de inicio si el usuario no tiene permisos suficientes
+        return redirect('index')  # Ajusta 'index' a la URL de tu página de inicio
+
+@login_required
+def ver_clientes(request):
+    # Lógica para mostrar los clientes del nutricionista
+    # Puedes implementar esta vista según la funcionalidad de tu aplicación
+    return render(request, 'clientes.html')
+
 class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
@@ -405,3 +483,11 @@ class ReservaViewSet(viewsets.ModelViewSet):
 class PerfilViewSet(viewsets.ModelViewSet):
     queryset = Perfil.objects.all()
     serializer_class = PerfilSerializer
+
+class DatosEnvioViewSet(viewsets.ModelViewSet):
+    queryset = DatosEnvio.objects.all()
+    serializer_class = DatosEnvioSerializer
+
+class ContratoEmpleadoViewSet(viewsets.ModelViewSet):
+    queryset = ContratoEmpleado.objects.all()
+    serializer_class = ContratoEmpleadoSerializer

@@ -12,6 +12,8 @@ router.register(r'fichas', FichaPacienteViewSet)
 router.register(r'evoluciones', EvolucionViewSet)
 router.register(r'reservas', ReservaViewSet)
 router.register(r'perfiles', PerfilViewSet)
+router.register(r'DatosEnvios', DatosEnvioViewSet)
+router.register(r'contratos', ContratoEmpleadoViewSet)
 
 # Define las URLs
 urlpatterns = [
@@ -41,4 +43,7 @@ urlpatterns = [
     path('actualizar_cantidad_carrito/<int:item_id>/', actualizar_cantidad_carrito, name='actualizar_cantidad_carrito'),
     path('reservar-hora/', reservar_hora, name='reservar_hora'),
     path('historial/', historial, name='historial'),
+    path('obtener_carrito/', obtener_carrito, name='obtener_carrito'),
+    path('ver-reservasn/', ver_reservasn, name='ver_reservasn'),
+    path('ver-clientes/', ver_clientes, name='ver_clientes')
 ]

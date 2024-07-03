@@ -30,12 +30,25 @@ class ContactoForm(forms.ModelForm):
 class FichaPacienteForm(forms.ModelForm):
     class Meta:
         model = FichaPaciente
-        fields = '__all__'
+        fields = ['usuario', 'peso', 'altura']
+
         widgets = {
-            'usuario': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
-            'peso': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Peso'}),
-            'altura': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Altura'}),
+            'usuario': forms.Select(attrs={'class': 'form-control'}),
+            'peso': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Peso en kg'}),
+            'altura': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Altura en metros'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['usuario'].queryset = User.objects.all()  # Opcional: Filtra aquí los usuarios si es necesario
+
+    def save(self, commit=True):
+        ficha = super().save(commit=False)
+        ficha.imc = ficha.peso / (ficha.altura ** 2)
+        if commit:
+            ficha.save()
+        return ficha
+        
 class EvolucionForm(forms.ModelForm):
     class Meta:
         model = Evolucion

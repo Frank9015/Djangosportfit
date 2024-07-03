@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Producto, Contacto, Venta, FichaPaciente, Evolucion, Reserva, Perfil
-
+from .models import *
 class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producto
@@ -46,3 +45,14 @@ class PerfilSerializer(serializers.ModelSerializer):
         if instance.user.is_superuser:
             representation['rol'] = 'superadmin'
         return representation
+
+class DatosEnvioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DatosEnvio
+        fields = '__all__'
+
+
+class ContratoEmpleadoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContratoEmpleado
+        fields = '__all__'
