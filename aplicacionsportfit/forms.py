@@ -1,5 +1,4 @@
 from django import forms
-from django.core.validators import RegexValidator
 from .models import *
 from django import forms
 from .models import Reserva
@@ -144,17 +143,3 @@ class DatosEnvioForm(forms.ModelForm):
     class Meta:
         model = DatosEnvio
         fields = ['nombre_completo', 'direccion', 'ciudad', 'estado', 'codigo_postal', 'telefono']
-        widgets = {
-            'nombre_completo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre Completo'}),
-            'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección'}),
-            'ciudad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ciudad'}),
-            'estado': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Estado'}),
-            'codigo_postal': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código Postal'}),
-            'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
-        }
-
-    def clean_telefono(self):
-        telefono = self.cleaned_data.get('telefono', '')
-        if telefono and not telefono.isdigit():
-            raise forms.ValidationError('El teléfono debe contener solo números.')
-        return telefono or 'Sin Datos'  # Si no hay teléfono, retorna "Sin Datos"

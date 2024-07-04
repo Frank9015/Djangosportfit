@@ -14,6 +14,7 @@ router.register(r'reservas', ReservaViewSet)
 router.register(r'perfiles', PerfilViewSet)
 router.register(r'DatosEnvios', DatosEnvioViewSet)
 router.register(r'contratos', ContratoEmpleadoViewSet)
+router.register(r'SeguimientoPedidos', SeguimientoPedidoViewSet)
 
 # Define las URLs
 urlpatterns = [
@@ -50,4 +51,5 @@ urlpatterns = [
     path('confirmacion-compra/<int:recibo_id>/', confirmacion_compra, name='confirmacion_compra'),
     path('paypal-return/', paypal_return, name='paypal_return'),
     path('ver_errores/', ver_errores, name='ver_errores'),
+    path('actualizar_estado_pedido/<int:pedido_id>/', actualizar_estado_pedido, name='actualizar_estado_pedido'),
 ]

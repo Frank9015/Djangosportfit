@@ -39,6 +39,7 @@ class Venta(models.Model):
     cantidad = models.PositiveIntegerField()
     total = models.DecimalField(max_digits=10, decimal_places=2)
     fecha_venta = models.DateTimeField(auto_now_add=True)
+    pedido_id = models.CharField(max_length=100, unique=True, blank=True, null=True)  # Nuevo campo para pedido_id
 
     def __str__(self):
         return f"Venta {self.id} - {self.usuario.username}"
@@ -164,16 +165,15 @@ class Reserva(models.Model):
 
 class DatosEnvio(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    nombre_completo = models.CharField(max_length=255,  null=True, blank=True)
-    direccion = models.CharField(max_length=255,  null=True, blank=True)
-    ciudad = models.CharField(max_length=100,  null=True, blank=True)
-    estado = models.CharField(max_length=100,  null=True, blank=True)
+    nombre_completo = models.CharField(max_length=255, null=True, blank=True)
+    direccion = models.CharField(max_length=255, null=True, blank=True)
+    ciudad = models.CharField(max_length=100, null=True, blank=True)
+    estado = models.CharField(max_length=100, null=True, blank=True)
     codigo_postal = models.CharField(max_length=20, null=True, blank=True)
-    telefono = models.CharField(max_length=20,  null=True, blank=True)
+    telefono = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
-        return f"Datos de Envío {self.id} - {self.usuario.username}"
-
+        return f'{self.nombre_completo}, {self.direccion}, {self.ciudad}, {self.estado}, {self.codigo_postal}, {self.telefono}'
 
 class ContratoEmpleado(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -190,3 +190,18 @@ class ContratoEmpleado(models.Model):
 
     def __str__(self):
         return f"Contrato de {self.nombre} ({self.usuario.username})"
+
+
+class SeguimientoPedido(models.Model):
+    ESTADO_CHOICES = [
+        ('empaquetando', 'Empaquetando'),
+        ('en_camino', 'En Camino'),
+        ('entregado', 'Entregado')
+    ]
+
+    venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name='seguimientos')
+    estado = models.CharField(max_length=50, choices=ESTADO_CHOICES, default='empaquetando')
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.venta.id} - {self.estado}"

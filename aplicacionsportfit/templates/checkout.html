@@ -75,8 +75,6 @@
             </div>
         </div>
     </main>
-</body>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
@@ -85,12 +83,12 @@
 <script>
     $(document).ready(function() {
         const exchangeRate = 800;  // 1 USD = 800 CLP
-
+    
         // Actualiza el resumen del pedido
         function updateOrderSummary(cartItems) {
             let orderSummary = '';
             let totalCLP = 0;
-
+    
             cartItems.forEach(item => {
                 totalCLP += item.producto.precio * item.cantidad;
                 orderSummary += `
@@ -103,19 +101,19 @@
                     </li>
                 `;
             });
-
+    
             $('#order-summary').html(orderSummary);
             $('#total-clp').text('$' + totalCLP.toLocaleString());
             calculateTotalInUSD(totalCLP);
         }
-
+    
         // Calcula el total en USD
         function calculateTotalInUSD(totalCLP) {
             const totalUSD = (totalCLP / exchangeRate).toFixed(2);
             $('#total-usd').text('$' + totalUSD);
             return totalUSD;
         }
-
+    
         // Maneja el cambio de método de pago
         $('input[name="metodo_pago"]').change(function() {
             if ($('#creditCardOption').is(':checked')) {
@@ -129,7 +127,7 @@
                 $('#paypal-button-container').hide();
             }
         });
-
+    
         // Configura los botones de PayPal
         paypal.Buttons({
             createOrder: function(data, actions) {
@@ -154,7 +152,7 @@
                 });
             }
         }).render('#paypal-button-container');
-
+    
         // Manejador del botón "Siguiente"
         $('#nextStepButton').click(function() {
             const isValid = $('#shippingForm')[0].checkValidity();
@@ -170,7 +168,7 @@
                 $('#shippingForm')[0].reportValidity();
             }
         });
-
+    
         // Llamada AJAX para obtener los items del carrito
         $.ajax({
             url: '{% url "obtener_carrito" %}',  // Asegúrate de que esta URL esté definida en tu urls.py

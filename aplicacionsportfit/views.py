@@ -403,12 +403,12 @@ def reservar_hora(request):
 def historial(request):
     ventas = Venta.objects.filter(usuario=request.user)
     reservas = Reserva.objects.filter(usuario=request.user)
+    
     context = {
         'ventas': ventas,
-        'reservas': reservas
+        'reservas': reservas,
     }
     return render(request, 'historial.html', context)
-
 
 @login_required
 def ver_reservasn(request):
@@ -428,23 +428,20 @@ def ver_reservasn(request):
 @login_required
 def procesar_compra(request):
     if request.method == 'POST':
+        print(request.POST)  # Para depuración
         form = DatosEnvioForm(request.POST)
         if form.is_valid():
             try:
-                # Guardar los datos de envío asociados al usuario actual
                 datos_envio = form.save(commit=False)
                 datos_envio.usuario = request.user
                 datos_envio.save()
 
                 cart = Cart.objects.get(user=request.user)
-                total_venta = 0
-
                 ventas_creadas = []
                 recibos_creados = []
 
                 with transaction.atomic():
                     for item in cart.items.all():
-                        # Crear la venta asociada con los datos de envío y otros detalles del producto
                         venta = Venta.objects.create(
                             usuario=request.user,
                             producto=item.producto,
@@ -453,40 +450,32 @@ def procesar_compra(request):
                         )
                         ventas_creadas.append(venta)
 
-                        # Crear el recibo asociado con la venta
                         recibo = Recibo.objects.create(
                             venta=venta
                         )
                         recibos_creados.append(recibo)
 
-                        # Actualizar el stock del producto después de la venta
                         item.producto.stock = F('stock') - item.cantidad
                         item.producto.save()
 
-                    # Limpiar el carrito de compras después de completar la transacción
                     cart.items.all().delete()
 
-                # Redirigir a la página de confirmación de compra con el ID del recibo creado
                 return redirect('confirmacion_compra', recibo_id=recibo.id)
 
             except Exception as e:
                 mensaje_error = f'Error al procesar la compra: {str(e)}'
-
                 datos_depuracion = {
                     'Formulario de Datos de Envío': form.cleaned_data,
                     'Carrito del Usuario': list(cart.items.all().values_list('producto__nombre', 'cantidad')),
                     'Ventas Creadas': [venta.__dict__ for venta in ventas_creadas],
                     'Recibos Creados': [recibo.__dict__ for recibo in recibos_creados],
                 }
-
                 context = {
                     'mensaje': mensaje_error,
                     'datos': datos_depuracion,
                 }
                 return render(request, 'errores.html', context)
-
         else:
-            # Manejar errores de validación del formulario de datos de envío
             errores = form.errors.as_data()
             mensaje_error = ""
             for campo, errores_lista in errores.items():
@@ -502,9 +491,8 @@ def procesar_compra(request):
             }
             return render(request, 'errores.html', context)
 
-    # Redirigir de vuelta al checkout si la solicitud no es POST o el formulario no es válido
     return redirect('checkout')
-
+    
 @login_required
 def confirmacion_compra(request, recibo_id):
     recibo = get_object_or_404(Recibo, id=recibo_id)
@@ -561,6 +549,25 @@ def ver_errores(request):
 
     return render(request, 'errores.html', context)
     
+@login_required
+def obtener_estado_pedido(request, pedido_id):
+    pedido = get_object_or_404(SeguimientoPedido, pedido_id=pedido_id, usuario=request.user)
+    return JsonResponse({'estado': pedido.estado, 'fecha_actualizacion': pedido.fecha_actualizacion})
+
+# Tu vista para actualizar el estado del pedido
+@csrf_exempt
+@login_required
+def actualizar_estado_pedido(request, pedido_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        nuevo_estado = data.get('estado')
+        if nuevo_estado in dict(SeguimientoPedido.ESTADO_CHOICES):
+            pedido = get_object_or_404(SeguimientoPedido, pedido_id=pedido_id, usuario=request.user)
+            pedido.estado = nuevo_estado
+            pedido.save()
+            return JsonResponse({'estado': pedido.estado, 'fecha_actualizacion': pedido.fecha_actualizacion})
+        return JsonResponse({'error': 'Estado inválido'}, status=400)
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
 class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
@@ -596,3 +603,7 @@ class DatosEnvioViewSet(viewsets.ModelViewSet):
 class ContratoEmpleadoViewSet(viewsets.ModelViewSet):
     queryset = ContratoEmpleado.objects.all()
     serializer_class = ContratoEmpleadoSerializer
+
+class SeguimientoPedidoViewSet(viewsets.ModelViewSet):
+    queryset = SeguimientoPedido.objects.all()
+    serializer_class = SeguimientoPedidoSerializer

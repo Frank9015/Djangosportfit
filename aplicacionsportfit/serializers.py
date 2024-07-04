@@ -38,7 +38,7 @@ class PerfilSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Perfil
-        fields = ['username', 'email', 'rol', 'is_superuser']
+        fields = '__all__'
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -55,4 +55,9 @@ class DatosEnvioSerializer(serializers.ModelSerializer):
 class ContratoEmpleadoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContratoEmpleado
+        fields = '__all__'
+
+class SeguimientoPedidoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeguimientoPedido
         fields = '__all__'

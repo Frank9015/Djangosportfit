@@ -29,8 +29,13 @@
                         <td>{{ venta.total }}</td>
                         <td>{{ venta.fecha_venta }}</td>
                         <td>
-                            <!-- Botón de seguimiento (de momento inactivo) -->
-                            <button class="btn btn-outline-primary btn-sm disabled">Seguimiento</button>
+                            {% if venta.seguimientos.all %}
+                                {% for seguimiento in venta.seguimientos.all %}
+                                    {% include 'seguimiento_progress.html' %}
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">Sin seguimiento</span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

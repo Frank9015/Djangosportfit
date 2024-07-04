@@ -2,42 +2,90 @@
 <!-- templates/confirmacion_compra.html -->
 
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <title>Confirmación de Compra</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .card-header h3 {
+            margin-bottom: 0;
+        }
+        .card-body h5 {
+            color: #007bff;
+            font-weight: bold;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .card-body p {
+            margin-bottom: 5px;
+        }
+        .btn-primary, .btn-secondary {
+            border-radius: 25px;
+        }
+        .btn-primary i, .btn-secondary i {
+            margin-right: 5px;
+        }
+        .mt-5 {
+            margin-top: 3rem!important;
+        }
+        .mt-3 {
+            margin-top: 1rem!important;
+        }
+        .mt-4 {
+            margin-top: 1.5rem!important;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h2>Confirmación de Compra</h2>
+        <h2 class="text-center"><i class="fas fa-check-circle text-success"></i> Confirmación de Compra</h2>
         <div class="card mt-3">
             <div class="card-header">
-                <h3>Resumen del Pedido</h3>
+                <h3><i class="fas fa-receipt"></i> Resumen del Pedido</h3>
             </div>
             <div class="card-body">
-                <h5>Datos de Envío</h5>
-                <p>Nombre Completo: {{ recibo.venta.datos_envio.nombre_completo }}</p>
-                <p>Dirección: {{ recibo.venta.datos_envio.direccion }}</p>
-                <p>Ciudad: {{ recibo.venta.datos_envio.ciudad }}</p>
-                <p>Estado: {{ recibo.venta.datos_envio.estado }}</p>
-                <p>Código Postal: {{ recibo.venta.datos_envio.codigo_postal }}</p>
-                <p>Teléfono: {{ recibo.venta.datos_envio.telefono }}</p>
+                <h5><i class="fas fa-map-marker-alt"></i> Datos de Envío</h5>
+                <p><strong>Nombre Completo:</strong> {{ recibo.venta.datos_envio.nombre_completo }}</p>
+                <p><strong>Dirección:</strong> {{ recibo.venta.datos_envio.direccion }}</p>
+                <p><strong>Ciudad:</strong> {{ recibo.venta.datos_envio.ciudad }}</p>
+                <p><strong>Estado:</strong> {{ recibo.venta.datos_envio.estado }}</p>
+                <p><strong>Código Postal:</strong> {{ recibo.venta.datos_envio.codigo_postal }}</p>
+                <p><strong>Teléfono:</strong> {{ recibo.venta.datos_envio.telefono }}</p>
 
-                <h5>Datos de la Compra</h5>
-                <p>Producto: {{ recibo.venta.producto.nombre }}</p>
-                <p>Cantidad: {{ recibo.venta.cantidad }}</p>
-                <p>Total: ${{ recibo.venta.total }}</p>
+                <h5><i class="fas fa-box"></i> Datos de la Compra</h5>
+                <p><strong>Producto:</strong> {{ recibo.venta.producto.nombre }}</p>
+                <p><strong>Cantidad:</strong> {{ recibo.venta.cantidad }}</p>
+                <p><strong>Total:</strong> ${{ recibo.venta.total }}</p>
 
-                <h5>Datos del Pago</h5>
-                <p>Método de Pago: {{ recibo.metodo_pago }}</p>
-                <p>Fecha de Emisión: {{ recibo.fecha_emision }}</p>
+                <h5><i class="fas fa-credit-card"></i> Datos del Pago</h5>
+                <p><strong>Fecha de Emisión:</strong> {{ recibo.fecha_emision }}</p>
 
-                <div class="mt-4">
-                    <a href="{% url 'historial' %}" class="btn btn-primary">Ver Historial</a>
-                    <a href="{% url 'index' %}" class="btn btn-secondary">Volver a la Tienda</a>
+                <div class="mt-4 text-center">
+                    <a href="{% url 'historial' %}" class="btn btn-primary"><i class="fas fa-history"></i> Ver Historial</a>
+                    <a href="{% url 'index' %}" class="btn btn-secondary"><i class="fas fa-store"></i> Volver a la Tienda</a>
                 </div>
             </div>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
 </body>
 </html>
