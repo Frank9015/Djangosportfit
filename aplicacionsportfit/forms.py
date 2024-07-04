@@ -143,3 +143,11 @@ class DatosEnvioForm(forms.ModelForm):
     class Meta:
         model = DatosEnvio
         fields = ['nombre_completo', 'direccion', 'ciudad', 'estado', 'codigo_postal', 'telefono']
+        widgets = {
+            'nombre_completo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre completo'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección'}),
+            'ciudad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ciudad'}),
+            'estado': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Estado'}),
+            'codigo_postal': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Código postal'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
+        }
