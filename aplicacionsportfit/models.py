@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db import transaction
+from django.db.models import F
 
 # Modelo para los productos en la tienda
 
@@ -41,10 +43,8 @@ class Venta(models.Model):
     def __str__(self):
         return f"Venta {self.id} - {self.usuario.username}"
 
-# Modelo para los recibos asociados a las ventas
 class Recibo(models.Model):
     venta = models.OneToOneField(Venta, on_delete=models.CASCADE)
-    metodo_pago = models.CharField(max_length=50)
     fecha_emision = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -164,12 +164,12 @@ class Reserva(models.Model):
 
 class DatosEnvio(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    nombre_completo = models.CharField(max_length=255)
-    direccion = models.CharField(max_length=255)
-    ciudad = models.CharField(max_length=100)
-    estado = models.CharField(max_length=100)
-    codigo_postal = models.CharField(max_length=20)
-    telefono = models.CharField(max_length=20)
+    nombre_completo = models.CharField(max_length=255,  null=True, blank=True)
+    direccion = models.CharField(max_length=255,  null=True, blank=True)
+    ciudad = models.CharField(max_length=100,  null=True, blank=True)
+    estado = models.CharField(max_length=100,  null=True, blank=True)
+    codigo_postal = models.CharField(max_length=20, null=True, blank=True)
+    telefono = models.CharField(max_length=20,  null=True, blank=True)
 
     def __str__(self):
         return f"Datos de Envío {self.id} - {self.usuario.username}"

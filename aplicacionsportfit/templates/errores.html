@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Errores y Depuración</title>
+    <!-- Agregar estilos CSS si es necesario -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .mensaje {
+            margin-bottom: 20px;
+        }
+        .datos {
+            margin-bottom: 40px;
+        }
+        .datos ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .datos ul li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Errores y Depuración</h1>
+        <div class="mensaje">
+            <p>{{ mensaje }}</p>
+        </div>
+        <div class="datos">
+            <h2>Datos de Depuración:</h2>
+            <ul>
+                {% for key, value in datos.items %}
+                <li><strong>{{ key }}:</strong>
+                    {% if value %}
+                    <ul>
+                        {% if value|length > 0 %}
+                        {% for item in value %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                        {% else %}
+                        <li>No hay datos disponibles</li>
+                        {% endif %}
+                    </ul>
+                    {% else %}
+                    <p>No hay datos disponibles</p>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

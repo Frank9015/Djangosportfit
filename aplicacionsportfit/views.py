@@ -12,11 +12,26 @@ from django.core.mail import send_mail
 from rest_framework import viewsets
 from rest_framework.permissions import IsAdminUser
 from rest_framework import generics
-
+from django.forms.utils import ErrorList
+from django.utils.html import strip_tags
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponseServerError, JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Cart, CartItem, DatosEnvio, Venta, Recibo
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseServerError
+from django.db import transaction
+from .models import DatosEnvio, Venta, Recibo, Cart
+from .forms import DatosEnvioForm
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseServerError
+from .forms import DatosEnvioForm  # Importa tu formulario DatosEnvioForm
+from .models import Cart, Venta, Recibo, DatosEnvio  # Importa todos los modelos relevantes
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.utils.html import strip_tags
+from django.db.models import F
 
 import requests
 import json
@@ -61,60 +76,13 @@ def checkout(request):
     user = request.user
     cart, created = Cart.objects.get_or_create(user=user)
     cart_items = CartItem.objects.filter(cart=cart)
+    datos_envio_form = DatosEnvioForm()
 
-    if request.method == 'POST':
-        try:
-            # Obtener datos del formulario de pago
-            full_name = request.POST.get('fullName')
-            address = request.POST.get('address')
-            city = request.POST.get('city')
-            state = request.POST.get('state')
-            zip_code = request.POST.get('zipCode')
-            phone = request.POST.get('phone')
-            payment_method = request.POST.get('paymentMethod')
+    return render(request, 'checkout.html', {
+        'cart_items': cart_items,
+        'datos_envio_form': datos_envio_form,
+    })
 
-            # Guardar datos de envío
-            datos_envio = DatosEnvio.objects.create(
-                usuario=user,
-                nombre_completo=full_name,
-                direccion=address,
-                ciudad=city,
-                estado=state,
-                codigo_postal=zip_code,
-                telefono=phone
-            )
-
-            # Iniciar una transacción para asegurar la consistencia de la base de datos
-            with transaction.atomic():
-                total_venta = 0
-                for item in cart_items:
-                    total_venta += item.producto.precio * item.cantidad
-
-                    # Crear registro de venta
-                    venta = Venta.objects.create(
-                        usuario=user,
-                        producto=item.producto,
-                        cantidad=item.cantidad,
-                        total=item.producto.precio * item.cantidad
-                    )
-
-                    # Crear registro de recibo asociado a la venta
-                    Recibo.objects.create(
-                        venta=venta,
-                        metodo_pago=payment_method
-                    )
-
-                # Limpiar el carrito
-                cart_items.delete()
-
-            # Redirigir al historial de compras
-            return redirect(reverse('historial_compras'))
-
-        except Exception as e:
-            # Manejar cualquier excepción y mostrar un mensaje de error
-            return HttpResponseServerError(f'Error al procesar la compra: {str(e)}')
-
-    return render(request, 'checkout.html', {'cart_items': cart_items})
 # Quienes somos view
 def quienes_somos(request):
     return render(request, 'quienes_somos.html')
@@ -456,64 +424,121 @@ def ver_reservasn(request):
     else:
         # Redirigir a la página de inicio si el usuario no tiene permisos suficientes
         return redirect('index')  # Ajusta 'index' a la URL de tu página de inicio
-@csrf_exempt
+
+@login_required
 def procesar_compra(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
+        form = DatosEnvioForm(request.POST)
+        if form.is_valid():
+            try:
+                # Guardar los datos de envío asociados al usuario actual
+                datos_envio = form.save(commit=False)
+                datos_envio.usuario = request.user
+                datos_envio.save()
 
-        user = request.user
-        full_name = data.get('fullName')
-        address = data.get('address')
-        city = data.get('city')
-        state = data.get('state')
-        zip_code = data.get('zipCode')
-        phone = data.get('phone')
-        payment_method = data.get('paymentMethod')
-        order_id = data.get('orderID')
-
-        try:
-            # Guardar datos de envío
-            datos_envio = DatosEnvio.objects.create(
-                usuario=user,
-                nombre_completo=full_name,
-                direccion=address,
-                ciudad=city,
-                estado=state,
-                codigo_postal=zip_code,
-                telefono=phone
-            )
-
-            # Iniciar una transacción para asegurar la consistencia de la base de datos
-            with transaction.atomic():
-                cart = Cart.objects.get(user=user)
-                cart_items = CartItem.objects.filter(cart=cart)
+                cart = Cart.objects.get(user=request.user)
                 total_venta = 0
-                for item in cart_items:
-                    total_venta += item.producto.precio * item.cantidad
 
-                    # Crear registro de venta
-                    venta = Venta.objects.create(
-                        usuario=user,
-                        producto=item.producto,
-                        cantidad=item.cantidad,
-                        total=item.producto.precio * item.cantidad
-                    )
+                ventas_creadas = []
+                recibos_creados = []
 
-                    # Crear registro de recibo asociado a la venta
-                    Recibo.objects.create(
-                        venta=venta,
-                        metodo_pago=payment_method
-                    )
+                with transaction.atomic():
+                    for item in cart.items.all():
+                        # Crear la venta asociada con los datos de envío y otros detalles del producto
+                        venta = Venta.objects.create(
+                            usuario=request.user,
+                            producto=item.producto,
+                            cantidad=item.cantidad,
+                            total=item.producto.precio * item.cantidad
+                        )
+                        ventas_creadas.append(venta)
 
-                # Limpiar el carrito
-                cart_items.delete()
+                        # Crear el recibo asociado con la venta
+                        recibo = Recibo.objects.create(
+                            venta=venta
+                        )
+                        recibos_creados.append(recibo)
 
-            return JsonResponse({'status': 'success', 'message': 'Compra registrada correctamente'})
+                        # Actualizar el stock del producto después de la venta
+                        item.producto.stock = F('stock') - item.cantidad
+                        item.producto.save()
+
+                    # Limpiar el carrito de compras después de completar la transacción
+                    cart.items.all().delete()
+
+                # Redirigir a la página de confirmación de compra con el ID del recibo creado
+                return redirect('confirmacion_compra', recibo_id=recibo.id)
+
+            except Exception as e:
+                mensaje_error = f'Error al procesar la compra: {str(e)}'
+
+                datos_depuracion = {
+                    'Formulario de Datos de Envío': form.cleaned_data,
+                    'Carrito del Usuario': list(cart.items.all().values_list('producto__nombre', 'cantidad')),
+                    'Ventas Creadas': [venta.__dict__ for venta in ventas_creadas],
+                    'Recibos Creados': [recibo.__dict__ for recibo in recibos_creados],
+                }
+
+                context = {
+                    'mensaje': mensaje_error,
+                    'datos': datos_depuracion,
+                }
+                return render(request, 'errores.html', context)
+
+        else:
+            # Manejar errores de validación del formulario de datos de envío
+            errores = form.errors.as_data()
+            mensaje_error = ""
+            for campo, errores_lista in errores.items():
+                for error in errores_lista:
+                    mensaje_error += f"{campo.capitalize()}: {strip_tags(error)}<br>"
+
+            context = {
+                'mensaje': f'Formulario de datos de envío inválido:<br>{mensaje_error}',
+                'datos': {
+                    'Formulario de Datos de Envío': form.cleaned_data,
+                    'Errores de Validación': errores,
+                }
+            }
+            return render(request, 'errores.html', context)
+
+    # Redirigir de vuelta al checkout si la solicitud no es POST o el formulario no es válido
+    return redirect('checkout')
+
+@login_required
+def confirmacion_compra(request, recibo_id):
+    recibo = get_object_or_404(Recibo, id=recibo_id)
+    return render(request, 'confirmacion_compra.html', {'recibo': recibo})
+
+@login_required
+def paypal_return(request):
+    if request.GET.get('payment_status') == 'Completed':
+        recibo_id = request.GET.get('invoice')
+        recibo = get_object_or_404(Recibo, id=recibo_id)
+
+        # Aquí podrías agregar más lógica para procesar la venta si es necesario
+        try:
+            with transaction.atomic():
+                # Actualizar el estado de la venta relacionada si es necesario
+                venta = recibo.venta
+                if not venta.pagada:
+                    venta.pagada = True
+                    venta.save()
+
+                    # Procesar cualquier otra lógica necesaria para completar la venta
+
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
+            # Manejar cualquier error que ocurra durante el procesamiento de la venta
+            mensaje_error = f'Error al procesar la venta: {str(e)}'
+            context = {
+                'mensaje': mensaje_error,
+            }
+            return render(request, 'errores.html', context)
 
-    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
-
+        return redirect('confirmacion_compra', recibo_id=recibo.id)
+    else:
+        # El estado del pago no es 'Completed', redirigir al checkout
+        return redirect('checkout')
 
 @login_required
 def ver_clientes(request):
@@ -521,6 +546,21 @@ def ver_clientes(request):
     # Puedes implementar esta vista según la funcionalidad de tu aplicación
     return render(request, 'clientes.html')
 
+def ver_errores(request):
+    mensaje = "Errores al procesar la compra."
+    # Supongamos que tienes datos específicos de depuración aquí
+    datos = {
+        'ejemplo': 'Información adicional de depuración.',
+        'otro_ejemplo': ['Item 1', 'Item 2', 'Item 3'],
+    }
+
+    context = {
+        'mensaje': mensaje,
+        'datos': datos,
+    }
+
+    return render(request, 'errores.html', context)
+    
 class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer

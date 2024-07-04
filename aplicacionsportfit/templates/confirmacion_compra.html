@@ -1,0 +1,43 @@
+<!-- templates/confirmacion_compra.html -->
+<!-- templates/confirmacion_compra.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirmación de Compra</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Confirmación de Compra</h2>
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3>Resumen del Pedido</h3>
+            </div>
+            <div class="card-body">
+                <h5>Datos de Envío</h5>
+                <p>Nombre Completo: {{ recibo.venta.datos_envio.nombre_completo }}</p>
+                <p>Dirección: {{ recibo.venta.datos_envio.direccion }}</p>
+                <p>Ciudad: {{ recibo.venta.datos_envio.ciudad }}</p>
+                <p>Estado: {{ recibo.venta.datos_envio.estado }}</p>
+                <p>Código Postal: {{ recibo.venta.datos_envio.codigo_postal }}</p>
+                <p>Teléfono: {{ recibo.venta.datos_envio.telefono }}</p>
+
+                <h5>Datos de la Compra</h5>
+                <p>Producto: {{ recibo.venta.producto.nombre }}</p>
+                <p>Cantidad: {{ recibo.venta.cantidad }}</p>
+                <p>Total: ${{ recibo.venta.total }}</p>
+
+                <h5>Datos del Pago</h5>
+                <p>Método de Pago: {{ recibo.metodo_pago }}</p>
+                <p>Fecha de Emisión: {{ recibo.fecha_emision }}</p>
+
+                <div class="mt-4">
+                    <a href="{% url 'historial' %}" class="btn btn-primary">Ver Historial</a>
+                    <a href="{% url 'index' %}" class="btn btn-secondary">Volver a la Tienda</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

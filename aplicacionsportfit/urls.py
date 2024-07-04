@@ -47,4 +47,7 @@ urlpatterns = [
     path('ver-reservasn/', ver_reservasn, name='ver_reservasn'),
     path('ver-clientes/', ver_clientes, name='ver_clientes'),
     path('procesar-compra/', procesar_compra, name='procesar_compra'),
+    path('confirmacion-compra/<int:recibo_id>/', confirmacion_compra, name='confirmacion_compra'),
+    path('paypal-return/', paypal_return, name='paypal_return'),
+    path('ver_errores/', ver_errores, name='ver_errores'),
 ]
