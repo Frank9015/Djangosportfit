@@ -456,6 +456,64 @@ def ver_reservasn(request):
     else:
         # Redirigir a la página de inicio si el usuario no tiene permisos suficientes
         return redirect('index')  # Ajusta 'index' a la URL de tu página de inicio
+@csrf_exempt
+def procesar_compra(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        user = request.user
+        full_name = data.get('fullName')
+        address = data.get('address')
+        city = data.get('city')
+        state = data.get('state')
+        zip_code = data.get('zipCode')
+        phone = data.get('phone')
+        payment_method = data.get('paymentMethod')
+        order_id = data.get('orderID')
+
+        try:
+            # Guardar datos de envío
+            datos_envio = DatosEnvio.objects.create(
+                usuario=user,
+                nombre_completo=full_name,
+                direccion=address,
+                ciudad=city,
+                estado=state,
+                codigo_postal=zip_code,
+                telefono=phone
+            )
+
+            # Iniciar una transacción para asegurar la consistencia de la base de datos
+            with transaction.atomic():
+                cart = Cart.objects.get(user=user)
+                cart_items = CartItem.objects.filter(cart=cart)
+                total_venta = 0
+                for item in cart_items:
+                    total_venta += item.producto.precio * item.cantidad
+
+                    # Crear registro de venta
+                    venta = Venta.objects.create(
+                        usuario=user,
+                        producto=item.producto,
+                        cantidad=item.cantidad,
+                        total=item.producto.precio * item.cantidad
+                    )
+
+                    # Crear registro de recibo asociado a la venta
+                    Recibo.objects.create(
+                        venta=venta,
+                        metodo_pago=payment_method
+                    )
+
+                # Limpiar el carrito
+                cart_items.delete()
+
+            return JsonResponse({'status': 'success', 'message': 'Compra registrada correctamente'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
 
 @login_required
 def ver_clientes(request):

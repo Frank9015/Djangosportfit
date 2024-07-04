@@ -9,7 +9,7 @@
             <div class="col-md-7">
                 <div class="form-section">
                     <h4>Información de Envío</h4>
-                    <form id="shippingForm" method="post">
+                    <form id="shippingForm" method="post" action="{% url 'procesar_compra' %}">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="fullName" class="form-label">Nombre Completo</label>
@@ -115,6 +115,7 @@
     $(document).ready(function() {
         const exchangeRate = 800;  // 1 USD = 800 CLP
 
+        // Actualiza el resumen del pedido
         function updateOrderSummary(cartItems) {
             let orderSummary = '';
             let totalCLP = 0;
@@ -137,12 +138,14 @@
             calculateTotalInUSD(totalCLP);
         }
 
+        // Calcula el total en USD
         function calculateTotalInUSD(totalCLP) {
             const totalUSD = (totalCLP / exchangeRate).toFixed(2);
             $('#total-usd').text('$' + totalUSD);
             return totalUSD;
         }
 
+        // Maneja el cambio de método de pago
         $('input[name="paymentMethod"]').change(function() {
             if ($('#creditCardOption').is(':checked')) {
                 $('#creditCardForm').show();
@@ -156,6 +159,7 @@
             }
         });
 
+        // Configura los botones de PayPal
         paypal.Buttons({
             createOrder: function(data, actions) {
                 const totalUSD = calculateTotalInUSD(parseInt($('#total-clp').text().replace(/\D/g, '')));
@@ -169,13 +173,14 @@
             },
             onApprove: function(data, actions) {
                 return actions.order.capture().then(function(details) {
-                    alert('Transaction completed by ' + details.payer.name.given_name);
+                    alert('Transacción completada por ' + details.payer.name.given_name);
                     // Redirigir al historial de compras
                     window.location.href = "{% url 'historial' %}";
                 });
             }
         }).render('#paypal-button-container');
 
+        // Maneja el botón de confirmación de pago
         $('#confirmButton').click(function(event) {
             event.preventDefault();
             if ($('#creditCardOption').is(':checked')) {
@@ -202,5 +207,6 @@
         });
     });
 </script>
+
 {% endblock %}
 

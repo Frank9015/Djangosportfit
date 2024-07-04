@@ -45,5 +45,6 @@ urlpatterns = [
     path('historial/', historial, name='historial'),
     path('obtener_carrito/', obtener_carrito, name='obtener_carrito'),
     path('ver-reservasn/', ver_reservasn, name='ver_reservasn'),
-    path('ver-clientes/', ver_clientes, name='ver_clientes')
+    path('ver-clientes/', ver_clientes, name='ver_clientes'),
+    path('procesar-compra/', procesar_compra, name='procesar_compra'),
 ]
